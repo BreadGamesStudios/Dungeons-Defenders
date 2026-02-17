@@ -1,0 +1,2450 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dungeon Defenders TD</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a2e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #ui-panel {
+            background: linear-gradient(180deg, #2c3e50, #34495e);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #e74c3c;
+        }
+
+        .stats {
+            display: flex;
+            gap: 25px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .stat-icon {
+            font-size: 22px;
+        }
+
+        .wave-info {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .stage-info {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 5px;
+            background: rgba(0,0,0,0.3);
+            padding: 5px;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: 2px solid transparent;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s;
+            opacity: 0.6;
+        }
+
+        .lang-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .lang-btn.active {
+            background: rgba(255,255,255,0.2);
+            border-color: #f39c12;
+            opacity: 1;
+        }
+
+        #game-area {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        #game-canvas {
+            flex: 1;
+            background: #228B22;
+            display: block;
+            cursor: crosshair;
+        }
+
+        #shop-panel {
+            width: 280px;
+            background: linear-gradient(180deg, #2c3e50, #1a252f);
+            padding: 10px;
+            overflow-y: auto;
+            border-left: 3px solid #e74c3c;
+        }
+
+        .shop-title {
+            color: #f39c12;
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .shop-category {
+            margin-bottom: 8px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .category-header {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 14px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .category-header:hover {
+            background: linear-gradient(135deg, #3d566e, #34495e);
+            border-color: #5dade2;
+        }
+
+        .category-header.active {
+            border-color: #f39c12;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .category-header.shooters {
+            border-color: #e74c3c;
+        }
+        .category-header.shooters:hover, .category-header.shooters.active {
+            border-color: #ff6b6b;
+        }
+
+        .category-header.magic {
+            border-color: #9b59b6;
+        }
+        .category-header.magic:hover, .category-header.magic.active {
+            border-color: #a569bd;
+        }
+
+        .category-header.legendary {
+            border-color: #f1c40f;
+            background: linear-gradient(135deg, #34495e, #3d4f61);
+        }
+        .category-header.legendary:hover, .category-header.legendary.active {
+            border-color: #f7dc6f;
+        }
+
+        .category-header.support {
+            border-color: #27ae60;
+        }
+        .category-header.support:hover, .category-header.support.active {
+            border-color: #2ecc71;
+        }
+
+        .category-icon {
+            font-size: 18px;
+            margin-right: 8px;
+        }
+
+        .category-arrow {
+            transition: transform 0.3s;
+            font-size: 12px;
+        }
+
+        .category-header.active .category-arrow {
+            transform: rotate(180deg);
+        }
+
+        .category-content {
+            display: none;
+            background: rgba(0,0,0,0.2);
+            padding: 8px;
+            border: 2px solid #3498db;
+            border-top: none;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .category-content.active {
+            display: block;
+        }
+
+        .category-content.shooters {
+            border-color: #e74c3c;
+        }
+
+        .category-content.magic {
+            border-color: #9b59b6;
+        }
+
+        .category-content.legendary {
+            border-color: #f1c40f;
+        }
+
+        .category-content.support {
+            border-color: #27ae60;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            border: 2px solid #f39c12;
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .hero-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .hero-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+        }
+
+        .hero-card.selected {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            border-color: #fff;
+            animation: selectedPulse 0.5s ease infinite alternate;
+        }
+
+        .hero-card.legendary {
+            border-color: #f1c40f;
+            background: linear-gradient(135deg, #34495e, #2c3e50, #3d4f61);
+        }
+
+        .hero-card.legendary:hover {
+            box-shadow: 0 5px 15px rgba(241, 196, 15, 0.5);
+        }
+
+        @keyframes selectedPulse {
+            from { box-shadow: 0 0 10px #27ae60; }
+            to { box-shadow: 0 0 25px #2ecc71; }
+        }
+
+        .hero-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .hero-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .hero-icon {
+            font-size: 24px;
+        }
+
+        .hero-name {
+            font-size: 13px;
+            font-weight: bold;
+            color: #f1c40f;
+            margin-left: 6px;
+        }
+
+        .hero-cost {
+            background: #e74c3c;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .hero-stats {
+            font-size: 11px;
+            color: #bdc3c7;
+            display: none;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 100%;
+            background: linear-gradient(135deg, #2c3e50, #1a252f);
+            border: 2px solid #f39c12;
+            border-radius: 8px;
+            padding: 10px;
+            z-index: 100;
+            margin-top: 5px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        .hero-card:hover .hero-stats {
+            display: block;
+        }
+
+        .hero-stat-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+        }
+
+        .wave-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #speed-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: 2px solid #5dade2;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #speed-btn:hover {
+            transform: scale(1.05);
+        }
+
+        #speed-btn.active {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border-color: #fff;
+            animation: speedPulse 0.5s ease infinite alternate;
+        }
+
+        @keyframes speedPulse {
+            from { box-shadow: 0 0 5px #e74c3c; }
+            to { box-shadow: 0 0 15px #c0392b; }
+        }
+
+        #auto-wave-btn {
+            background: linear-gradient(135deg, #7f8c8d, #6c7a7d);
+            color: white;
+            border: 2px solid #95a5a6;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #auto-wave-btn:hover {
+            transform: scale(1.05);
+        }
+
+        #auto-wave-btn.active {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            border-color: #fff;
+            animation: autoPulse 1s ease infinite alternate;
+        }
+
+        @keyframes autoPulse {
+            from { box-shadow: 0 0 5px #9b59b6; }
+            to { box-shadow: 0 0 15px #8e44ad; }
+        }
+
+        #start-wave-btn {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            border: 2px solid #fff;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #start-wave-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(39, 174, 96, 0.5);
+        }
+
+        #start-wave-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #7f8c8d;
+        }
+
+        .instructions {
+            background: rgba(0,0,0,0.4);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 11px;
+            color: #bdc3c7;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .instructions strong {
+            color: #f39c12;
+        }
+
+        .game-over-screen, .stage-complete-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .game-over-box, .stage-complete-box {
+            background: linear-gradient(135deg, #2c3e50, #1a252f);
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            border: 3px solid #e74c3c;
+            color: white;
+            max-width: 500px;
+        }
+
+        .stage-complete-box {
+            border-color: #9b59b6;
+        }
+
+        .game-over-box h2, .stage-complete-box h2 {
+            font-size: 42px;
+            margin-bottom: 20px;
+        }
+
+        .game-over-box p, .stage-complete-box p {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+
+        .stage-complete-box .stage-bonus {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 18px;
+        }
+
+        .stage-complete-box .next-stage-info {
+            background: rgba(155, 89, 182, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 14px;
+            border: 1px solid #9b59b6;
+        }
+
+        .restart-btn, .next-stage-btn, .stay-btn, .retry-btn {
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            margin: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .retry-btn {
+            background: linear-gradient(135deg, #f39c12, #d68910);
+        }
+
+        .next-stage-btn {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+
+        .stay-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .restart-btn:hover, .next-stage-btn:hover, .stay-btn:hover, .retry-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        #upgrade-menu {
+            position: fixed;
+            background: linear-gradient(135deg, #2c3e50, #1a252f);
+            border: 3px solid #f39c12;
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            z-index: 500;
+            min-width: 230px;
+            text-align: center;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        #upgrade-menu h3 {
+            color: #f39c12;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        #upgrade-menu .stats-info {
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        #upgrade-menu .stats-info div {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        #upgrade-btn {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        #upgrade-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        #upgrade-btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        #sell-btn {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        #sell-btn:hover {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        #close-menu-btn {
+            background: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        #close-menu-btn:hover {
+            background: #95a5a6;
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        .diff-normal { background: #27ae60; }
+        .diff-hard { background: #f39c12; }
+        .diff-nightmare { background: #e74c3c; }
+        .diff-hell { background: #8e44ad; }
+        .diff-inferno { background: #c0392b; }
+
+        .retry-info {
+            background: rgba(243, 156, 18, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+            border: 1px solid #f39c12;
+        }
+
+        .gold-multiplier {
+            background: rgba(241, 196, 15, 0.2);
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+            border: 1px solid #f1c40f;
+            color: #f1c40f;
+        }
+
+        .stat.kills {
+            background: linear-gradient(135deg, #8e44ad, #6c3483);
+        }
+
+        #ability-btn {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+            border: 2px solid #f39c12;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        #ability-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+
+        #ability-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #7f8c8d;
+        }
+
+        #ability-btn.ready {
+            animation: abilityReady 1s ease infinite alternate;
+        }
+
+        @keyframes abilityReady {
+            from { box-shadow: 0 0 5px #f39c12; }
+            to { box-shadow: 0 0 20px #e67e22; }
+        }
+
+        .boss-warning {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(231, 76, 60, 0.95);
+            color: white;
+            padding: 30px 60px;
+            border-radius: 15px;
+            font-size: 32px;
+            font-weight: bold;
+            z-index: 999;
+            border: 4px solid #fff;
+            animation: bossWarning 0.5s ease infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes bossWarning {
+            from { transform: translate(-50%, -50%) scale(1); }
+            to { transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .achievement-popup {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: linear-gradient(135deg, #f39c12, #d68910);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 998;
+            border: 3px solid #fff;
+            animation: slideIn 0.5s ease, slideOut 0.5s ease 2.5s;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+
+        .hero-type-badge {
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 4px;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+
+        .badge-legendary { background: #f1c40f; color: #1a1a2e; }
+
+        .category-count {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui-panel">
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-icon">❤️</span>
+                <span><span data-i18n="health">Vida</span>: <span id="health">100</span></span>
+            </div>
+            <div class="stat">
+                <span class="stat-icon">💰</span>
+                <span><span data-i18n="gold">Ouro</span>: <span id="gold">1000</span></span>
+            </div>
+            <div class="stat kills">
+                <span class="stat-icon">💀</span>
+                <span><span data-i18n="kills">Mortes</span>: <span id="kills">0</span></span>
+            </div>
+            <div class="stage-info">
+                🏰 <span data-i18n="stage">Fase</span>: <span id="stage">1</span>
+            </div>
+            <div class="wave-info">
+                ⚔️ <span data-i18n="wave">Onda</span>: <span id="wave">0</span> / 25
+            </div>
+            <div class="language-selector">
+                <button class="lang-btn active" data-lang="pt" title="Português">🇧🇷</button>
+                <button class="lang-btn" data-lang="es" title="Español">🇪🇸</button>
+                <button class="lang-btn" data-lang="en" title="English">🇺🇸</button>
+            </div>
+        </div>
+        <div class="wave-controls">
+            <button id="ability-btn" title="Habilidade Especial">⚡ <span data-i18n="power">PODER</span></button>
+            <button id="speed-btn">⚡ 1x</button>
+            <button id="auto-wave-btn">🔄 Auto: OFF</button>
+            <button id="start-wave-btn">▶️ <span data-i18n="startWave">Iniciar Onda</span></button>
+        </div>
+    </div>
+    
+    <div id="game-area">
+        <canvas id="game-canvas"></canvas>
+        <div id="shop-panel">
+            <h2 class="shop-title">⚔️ <span data-i18n="heroes">HERÓIS</span> ⚔️</h2>
+            <div id="hero-shop"></div>
+            <div class="instructions" id="instructions"></div>
+        </div>
+    </div>
+
+    <div id="upgrade-menu">
+        <h3 id="menu-hero-name">🗡️ Guerreiro</h3>
+        <div class="stats-info" id="menu-stats"></div>
+        <div class="menu-buttons">
+            <button id="upgrade-btn">⬆️ UPGRADE (💰<span id="upgrade-cost">50</span>)</button>
+            <button id="sell-btn">💸 <span data-i18n="sell">VENDER</span> (+<span id="sell-price">50</span>💰)</button>
+            <button id="close-menu-btn">✖️ <span data-i18n="close">Fechar</span></button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const upgradeMenu = document.getElementById('upgrade-menu');
+
+        // Sistema de Tradução
+        const translations = {
+            pt: {
+                // UI
+                health: "Vida",
+                gold: "Ouro",
+                kills: "Mortes",
+                stage: "Fase",
+                wave: "Onda",
+                power: "PODER",
+                startWave: "Iniciar Onda",
+                heroes: "HERÓIS",
+                sell: "VENDER",
+                close: "Fechar",
+                autoOn: "Auto: ON",
+                autoOff: "Auto: OFF",
+                
+                // Categorias
+                shooters: "Atiradores",
+                magic: "Magia",
+                legendary: "Lendários",
+                support: "Suporte",
+                
+                // Heróis
+                warrior: "Guerreiro",
+                archer: "Arqueiro",
+                assassin: "Assassino",
+                sniper: "Atirador",
+                cannon: "Canhão",
+                bomber: "Bombardeiro",
+                paladin: "Paladino",
+                mage: "Mago",
+                cleric: "Clérigo",
+                frost: "Mago Gelo",
+                necro: "Necromante",
+                templar: "Templário",
+                ninja: "Ninja",
+                druid: "Druida",
+                lightning: "Relâmpago",
+                farm: "Fazenda",
+                
+                // Descrições
+                warriorDesc: "Alto dano, alcance médio",
+                archerDesc: "Ataque rápido à distância",
+                assassinDesc: "Dano extremo, curto alcance",
+                sniperDesc: "Alcance máximo, ataque lento",
+                cannonDesc: "Dano massivo, muito lento",
+                bomberDesc: "Explosão em área grande",
+                paladinDesc: "Buff: +20% dano aliados próximos",
+                mageDesc: "Dano mágico em área",
+                clericDesc: "Cura a torre e ataca",
+                frostDesc: "Congela inimigos (slow 50%)",
+                necroDesc: "Veneno: dano por segundo",
+                templarDesc: "Cavaleiro sagrado devastador",
+                ninjaDesc: "Ataque ultra rápido",
+                druidDesc: "Cura aliados e ataca",
+                lightningDesc: "Atinge múltiplos inimigos",
+                farmDesc: "Gera 10💰 a cada 12s",
+                
+                // Stats
+                damage: "Dano",
+                range: "Alcance",
+                speed: "Vel",
+                income: "Renda",
+                interval: "Intervalo",
+                level: "Nível",
+                invested: "Investido",
+                next: "Próximo",
+                
+                // Mensagens
+                waveComplete: "ONDA {0} COMPLETA!",
+                bonus: "BÔNUS!",
+                nextWaveIn: "Próxima onda em 2s...",
+                infiniteMode: "MODO INFINITO!",
+                cannotPlace: "Não pode!",
+                tooClose: "Muito perto!",
+                meteor: "METEORO!",
+                hit: "ATINGIDOS!",
+                bossWarning: "⚠️ CHEFÃO APARECENDO! ⚠️",
+                paused: "PAUSADA",
+                crit: "CRIT!",
+                
+                // Game Over
+                gameOver: "💀 GAME OVER 💀",
+                victory: "🏆 VITÓRIA! 🏆",
+                totalWaves: "Total de Ondas",
+                heroesCount: "Heróis",
+                farmsCount: "Fazendas",
+                tryAgain: "Tentar Fase {0} Novamente",
+                initialGold: "Ouro inicial",
+                goldMultiplier: "Multiplicador de ouro",
+                noHeroes: "Sem heróis",
+                retryStage: "🔄 Tentar Fase {0} Novamente",
+                backToStage1: "🏠 Voltar para Fase 1",
+                playAgain: "🔄 Jogar Novamente",
+                
+                // Stage Complete
+                stageComplete: "🏆 FASE {0} COMPLETA! 🏆",
+                difficulty: "Dificuldade",
+                stageBonus: "Bônus de Fase",
+                totalGold: "Ouro Total",
+                totalKills: "Total de Mortes",
+                currentGold: "Ouro atual",
+                nextStage: "Próxima fase",
+                nextStageInfo: "📍 FASE {0}",
+                enemiesStronger: "Inimigos +{0}% mais fortes",
+                enemiesDrop: "Inimigos dropam {0}x ouro!",
+                longerPath: "Caminho mais longo",
+                heroesRemoved: "Seus heróis serão removidos!",
+                keepGold: "Você mantém seu ouro!",
+                goToStage: "🚀 IR PARA FASE {0}",
+                continueEndless: "♾️ Continuar Infinito",
+                restartZero: "🔄 Recomeçar do Zero",
+                
+                // Dificuldades
+                normal: "Normal",
+                hard: "Difícil",
+                nightmare: "Pesadelo",
+                hell: "Inferno",
+                impossible: "Impossível",
+                
+                // Instruções
+                instructions: `<strong>📖 COMO JOGAR:</strong><br>
+                    1️⃣ Clique na categoria<br>
+                    2️⃣ Passe o mouse para ver stats<br>
+                    3️⃣ Clique no herói → posicione<br>
+                    4️⃣ Clique no colocado = menu<br><br>
+                    <strong style="color:#e74c3c;">⚡ PODER: Dano em área (30s)</strong>`,
+                
+                // Estruturas
+                evilLair: "☠️ COVIL SOMBRIO",
+                cursedMountain: "💀 MONTANHA MALDITA",
+                infernoPortal: "🔥 PORTAL INFERNAL",
+                yourCastle: "🛡️ SEU CASTELO",
+                
+                // Achievements
+                kills100: "💀 100 MORTES!",
+                kills500: "⚔️ 500 MORTES!"
+            },
+            es: {
+                // UI
+                health: "Vida",
+                gold: "Oro",
+                kills: "Muertes",
+                stage: "Etapa",
+                wave: "Oleada",
+                power: "PODER",
+                startWave: "Iniciar Oleada",
+                heroes: "HÉROES",
+                sell: "VENDER",
+                close: "Cerrar",
+                autoOn: "Auto: ON",
+                autoOff: "Auto: OFF",
+                
+                // Categorias
+                shooters: "Tiradores",
+                magic: "Magia",
+                legendary: "Legendarios",
+                support: "Soporte",
+                
+                // Heróis
+                warrior: "Guerrero",
+                archer: "Arquero",
+                assassin: "Asesino",
+                sniper: "Francotirador",
+                cannon: "Cañón",
+                bomber: "Bombardero",
+                paladin: "Paladín",
+                mage: "Mago",
+                cleric: "Clérigo",
+                frost: "Mago de Hielo",
+                necro: "Nigromante",
+                templar: "Templario",
+                ninja: "Ninja",
+                druid: "Druida",
+                lightning: "Relámpago",
+                farm: "Granja",
+                
+                // Descrições
+                warriorDesc: "Alto daño, alcance medio",
+                archerDesc: "Ataque rápido a distancia",
+                assassinDesc: "Daño extremo, corto alcance",
+                sniperDesc: "Alcance máximo, ataque lento",
+                cannonDesc: "Daño masivo, muy lento",
+                bomberDesc: "Explosión en área grande",
+                paladinDesc: "Buff: +20% daño aliados cercanos",
+                mageDesc: "Daño mágico en área",
+                clericDesc: "Cura la torre y ataca",
+                frostDesc: "Congela enemigos (slow 50%)",
+                necroDesc: "Veneno: daño por segundo",
+                templarDesc: "Caballero sagrado devastador",
+                ninjaDesc: "Ataque ultra rápido",
+                druidDesc: "Cura aliados y ataca",
+                lightningDesc: "Alcanza múltiples enemigos",
+                farmDesc: "Genera 10💰 cada 12s",
+                
+                // Stats
+                damage: "Daño",
+                range: "Alcance",
+                speed: "Vel",
+                income: "Ingreso",
+                interval: "Intervalo",
+                level: "Nivel",
+                invested: "Invertido",
+                next: "Siguiente",
+                
+                // Mensagens
+                waveComplete: "¡OLEADA {0} COMPLETADA!",
+                bonus: "¡BONUS!",
+                nextWaveIn: "Próxima oleada en 2s...",
+                infiniteMode: "¡MODO INFINITO!",
+                cannotPlace: "¡No puedes!",
+                tooClose: "¡Muy cerca!",
+                meteor: "¡METEORO!",
+                hit: "¡ALCANZADOS!",
+                bossWarning: "⚠️ ¡JEFE APARECIENDO! ⚠️",
+                paused: "PAUSADA",
+                crit: "¡CRIT!",
+                
+                // Game Over
+                gameOver: "💀 FIN DEL JUEGO 💀",
+                victory: "🏆 ¡VICTORIA! 🏆",
+                totalWaves: "Total de Oleadas",
+                heroesCount: "Héroes",
+                farmsCount: "Granjas",
+                tryAgain: "Intentar Etapa {0} Nuevamente",
+                initialGold: "Oro inicial",
+                goldMultiplier: "Multiplicador de oro",
+                noHeroes: "Sin héroes",
+                retryStage: "🔄 Intentar Etapa {0} Nuevamente",
+                backToStage1: "🏠 Volver a Etapa 1",
+                playAgain: "🔄 Jugar Nuevamente",
+                
+                // Stage Complete
+                stageComplete: "🏆 ¡ETAPA {0} COMPLETADA! 🏆",
+                difficulty: "Dificultad",
+                stageBonus: "Bonus de Etapa",
+                totalGold: "Oro Total",
+                totalKills: "Total de Muertes",
+                currentGold: "Oro actual",
+                nextStage: "Próxima etapa",
+                nextStageInfo: "📍 ETAPA {0}",
+                enemiesStronger: "Enemigos +{0}% más fuertes",
+                enemiesDrop: "¡Enemigos sueltan {0}x oro!",
+                longerPath: "Camino más largo",
+                heroesRemoved: "¡Tus héroes serán eliminados!",
+                keepGold: "¡Mantienes tu oro!",
+                goToStage: "🚀 IR A ETAPA {0}",
+                continueEndless: "♾️ Continuar Infinito",
+                restartZero: "🔄 Reiniciar desde Cero",
+                
+                // Dificuldades
+                normal: "Normal",
+                hard: "Difícil",
+                nightmare: "Pesadilla",
+                hell: "Infierno",
+                impossible: "Imposible",
+                
+                // Instruções
+                instructions: `<strong>📖 CÓMO JUGAR:</strong><br>
+                    1️⃣ Haz clic en la categoría<br>
+                    2️⃣ Pasa el mouse para ver stats<br>
+                    3️⃣ Clic en héroe → posiciona<br>
+                    4️⃣ Clic en colocado = menú<br><br>
+                    <strong style="color:#e74c3c;">⚡ PODER: Daño en área (30s)</strong>`,
+                
+                // Estruturas
+                evilLair: "☠️ GUARIDA MALVADA",
+                cursedMountain: "💀 MONTAÑA MALDITA",
+                infernoPortal: "🔥 PORTAL INFERNAL",
+                yourCastle: "🛡️ TU CASTILLO",
+                
+                // Achievements
+                kills100: "💀 ¡100 MUERTES!",
+                kills500: "⚔️ ¡500 MUERTES!"
+            },
+            en: {
+                // UI
+                health: "Health",
+                gold: "Gold",
+                kills: "Kills",
+                stage: "Stage",
+                wave: "Wave",
+                power: "POWER",
+                startWave: "Start Wave",
+                heroes: "HEROES",
+                sell: "SELL",
+                close: "Close",
+                autoOn: "Auto: ON",
+                autoOff: "Auto: OFF",
+                
+                // Categorias
+                shooters: "Shooters",
+                magic: "Magic",
+                legendary: "Legendary",
+                support: "Support",
+                
+                // Heróis
+                warrior: "Warrior",
+                archer: "Archer",
+                assassin: "Assassin",
+                sniper: "Sniper",
+                cannon: "Cannon",
+                bomber: "Bomber",
+                paladin: "Paladin",
+                mage: "Mage",
+                cleric: "Cleric",
+                frost: "Frost Mage",
+                necro: "Necromancer",
+                templar: "Templar",
+                ninja: "Ninja",
+                druid: "Druid",
+                lightning: "Lightning",
+                farm: "Farm",
+                
+                // Descrições
+                warriorDesc: "High damage, medium range",
+                archerDesc: "Fast ranged attack",
+                assassinDesc: "Extreme damage, short range",
+                sniperDesc: "Maximum range, slow attack",
+                cannonDesc: "Massive damage, very slow",
+                bomberDesc: "Large area explosion",
+                paladinDesc: "Buff: +20% damage nearby allies",
+                mageDesc: "Magic area damage",
+                clericDesc: "Heals tower and attacks",
+                frostDesc: "Freezes enemies (50% slow)",
+                necroDesc: "Poison: damage per second",
+                templarDesc: "Devastating holy knight",
+                ninjaDesc: "Ultra fast attack",
+                druidDesc: "Heals allies and attacks",
+                lightningDesc: "Hits multiple enemies",
+                farmDesc: "Generates 10💰 every 12s",
+                
+                // Stats
+                damage: "Damage",
+                range: "Range",
+                speed: "Speed",
+                income: "Income",
+                interval: "Interval",
+                level: "Level",
+                invested: "Invested",
+                next: "Next",
+                
+                // Mensagens
+                waveComplete: "WAVE {0} COMPLETE!",
+                bonus: "BONUS!",
+                nextWaveIn: "Next wave in 2s...",
+                infiniteMode: "INFINITE MODE!",
+                cannotPlace: "Can't place!",
+                tooClose: "Too close!",
+                meteor: "METEOR!",
+                hit: "HIT!",
+                bossWarning: "⚠️ BOSS INCOMING! ⚠️",
+                paused: "PAUSED",
+                crit: "CRIT!",
+                
+                // Game Over
+                gameOver: "💀 GAME OVER 💀",
+                victory: "🏆 VICTORY! 🏆",
+                totalWaves: "Total Waves",
+                heroesCount: "Heroes",
+                farmsCount: "Farms",
+                tryAgain: "Try Stage {0} Again",
+                initialGold: "Initial gold",
+                goldMultiplier: "Gold multiplier",
+                noHeroes: "No heroes",
+                retryStage: "🔄 Try Stage {0} Again",
+                backToStage1: "🏠 Back to Stage 1",
+                playAgain: "🔄 Play Again",
+                
+                // Stage Complete
+                stageComplete: "🏆 STAGE {0} COMPLETE! 🏆",
+                difficulty: "Difficulty",
+                stageBonus: "Stage Bonus",
+                totalGold: "Total Gold",
+                totalKills: "Total Kills",
+                currentGold: "Current gold",
+                nextStage: "Next stage",
+                nextStageInfo: "📍 STAGE {0}",
+                enemiesStronger: "Enemies +{0}% stronger",
+                enemiesDrop: "Enemies drop {0}x gold!",
+                longerPath: "Longer path",
+                heroesRemoved: "Your heroes will be removed!",
+                keepGold: "You keep your gold!",
+                goToStage: "🚀 GO TO STAGE {0}",
+                continueEndless: "♾️ Continue Endless",
+                restartZero: "🔄 Restart from Zero",
+                
+                // Dificuldades
+                normal: "Normal",
+                hard: "Hard",
+                nightmare: "Nightmare",
+                hell: "Hell",
+                impossible: "Impossible",
+                
+                // Instruções
+                instructions: `<strong>📖 HOW TO PLAY:</strong><br>
+                    1️⃣ Click on the category<br>
+                    2️⃣ Hover to see stats<br>
+                    3️⃣ Click hero → place it<br>
+                    4️⃣ Click placed = menu<br><br>
+                    <strong style="color:#e74c3c;">⚡ POWER: Area damage (30s)</strong>`,
+                
+                // Estruturas
+                evilLair: "☠️ EVIL LAIR",
+                cursedMountain: "💀 CURSED MOUNTAIN",
+                infernoPortal: "🔥 INFERNO PORTAL",
+                yourCastle: "🛡️ YOUR CASTLE",
+                
+                // Achievements
+                kills100: "💀 100 KILLS!",
+                kills500: "⚔️ 500 KILLS!"
+            }
+        };
+
+        let currentLang = 'pt';
+
+        function t(key, ...args) {
+            let text = translations[currentLang][key] || translations['pt'][key] || key;
+            args.forEach((arg, i) => {
+                text = text.replace(`{${i}}`, arg);
+            });
+            return text;
+        }
+
+        function updateLanguage() {
+            // Atualizar elementos com data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.textContent = t(key);
+            });
+            
+            // Atualizar instruções
+            document.getElementById('instructions').innerHTML = t('instructions');
+            
+            // Atualizar botões de auto
+            const autoBtn = document.getElementById('auto-wave-btn');
+            if (game.autoWave) {
+                autoBtn.textContent = '🔄 ' + t('autoOn');
+            } else {
+                autoBtn.textContent = '🔄 ' + t('autoOff');
+            }
+            
+            // Recriar shop com traduções
+            createShop();
+            
+            // Atualizar menu de upgrade se estiver aberto
+            if (game.selectedHeroForUpgrade) {
+                updateUpgradeMenuContent();
+            }
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+            updateLanguage();
+        }
+
+        // Event listeners para botões de idioma
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setLanguage(btn.dataset.lang);
+            });
+        });
+
+        function getStartingGold(stage) {
+            return 1000 + (stage - 1) * 500;
+        }
+
+        function getGoldMultiplier(stage) {
+            return Math.pow(2, stage - 1);
+        }
+
+        const game = {
+            health: 100,
+            gold: 1000,
+            wave: 0,
+            maxWaves: 25,
+            stage: 1,
+            gameSpeed: 1,
+            enemies: [],
+            heroes: [],
+            projectiles: [],
+            effects: [],
+            selectedHeroType: null,
+            selectedHeroForUpgrade: null,
+            waveActive: false,
+            autoWave: false,
+            gameOver: false,
+            stagePaused: false,
+            path: [],
+            enemiesSpawned: 0,
+            totalEnemiesToSpawn: 0,
+            menuPosition: { x: 0, y: 0 },
+            kills: 0,
+            abilityCooldown: 0,
+            abilityReady: true,
+            lastAbilityUse: 0,
+            criticalChance: 0.10,
+            bossWarningActive: false,
+            achievements: []
+        };
+
+        const heroCategories = {
+            shooters: {
+                icon: '🏹',
+                heroes: ['warrior', 'archer', 'assassin', 'sniper', 'cannon', 'bomber', 'paladin']
+            },
+            magic: {
+                icon: '🔮',
+                heroes: ['mage', 'cleric', 'frost', 'necro']
+            },
+            legendary: {
+                icon: '⭐',
+                heroes: ['templar', 'ninja', 'druid', 'lightning']
+            },
+            support: {
+                icon: '🌾',
+                heroes: ['farm']
+            }
+        };
+
+        const heroTypes = {
+            warrior: { image: '🗡️', cost: 100, damage: 55, range: 100, attackSpeed: 500, color: '#e74c3c', type: 'combat', category: 'shooters' },
+            archer: { image: '🏹', cost: 150, damage: 25, range: 200, attackSpeed: 800, color: '#27ae60', type: 'combat', category: 'shooters' },
+            assassin: { image: '🗡️', cost: 180, damage: 80, range: 80, attackSpeed: 350, color: '#8e44ad', type: 'combat', category: 'shooters' },
+            sniper: { image: '🎯', cost: 300, damage: 150, range: 350, attackSpeed: 2500, color: '#1abc9c', type: 'combat', category: 'shooters' },
+            cannon: { image: '🔫', cost: 400, damage: 200, range: 180, attackSpeed: 3000, color: '#7f8c8d', type: 'combat', category: 'shooters' },
+            bomber: { image: '💣', cost: 280, damage: 80, range: 150, attackSpeed: 2200, color: '#e67e22', type: 'combat', category: 'shooters' },
+            paladin: { image: '⚔️', cost: 320, damage: 70, range: 120, attackSpeed: 900, color: '#f39c12', type: 'combat', category: 'shooters' },
+            mage: { image: '🧙‍♂️', cost: 250, damage: 50, range: 180, attackSpeed: 1800, color: '#3498db', type: 'combat', category: 'magic' },
+            cleric: { image: '⛪', cost: 200, damage: 20, range: 150, attackSpeed: 1500, color: '#f1c40f', type: 'support', category: 'magic' },
+            frost: { image: '❄️', cost: 220, damage: 15, range: 160, attackSpeed: 1200, color: '#74b9ff', type: 'slow', category: 'magic' },
+            necro: { image: '💀', cost: 350, damage: 35, range: 170, attackSpeed: 1000, color: '#6c3483', type: 'combat', category: 'magic' },
+            templar: { image: '🛡️', cost: 360, damage: 200, range: 200, attackSpeed: 400, color: '#ecf0f1', type: 'legendary', category: 'legendary' },
+            ninja: { image: '🥷', cost: 250, damage: 40, range: 130, attackSpeed: 300, color: '#2c3e50', type: 'legendary', category: 'legendary' },
+            druid: { image: '🌿', cost: 280, damage: 30, range: 140, attackSpeed: 1400, color: '#27ae60', type: 'legendary', category: 'legendary' },
+            lightning: { image: '⚡', cost: 380, damage: 60, range: 200, attackSpeed: 800, color: '#f1c40f', type: 'legendary', category: 'legendary' },
+            farm: { image: '🌾', cost: 150, damage: 0, range: 0, attackSpeed: 12000, color: '#d35400', type: 'economy', category: 'support', goldPerTick: 10 }
+        };
+
+        const enemyTypes = {
+            goblin: { name: 'Goblin', emoji: '👺', health: 50, speed: 1.8, damage: 5, gold: 3 },
+            orc: { name: 'Orc', emoji: '👹', health: 100, speed: 1.4, damage: 10, gold: 5 },
+            troll: { name: 'Troll', emoji: '🧟', health: 200, speed: 1.0, damage: 15, gold: 7 },
+            ogre: { name: 'Ogre', emoji: '👾', health: 350, speed: 0.8, damage: 25, gold: 10 },
+            dragon: { name: 'Dragão', emoji: '🐉', health: 500, speed: 1.2, damage: 40, gold: 25 },
+            demon: { name: 'Demônio', emoji: '👿', health: 800, speed: 1.5, damage: 50, gold: 40 },
+            boss: { name: 'Chefão', emoji: '💀', health: 2000, speed: 0.6, damage: 100, gold: 100 }
+        };
+
+        const stageDifficulty = {
+            1: { key: 'normal', class: 'diff-normal' },
+            2: { key: 'hard', class: 'diff-hard' },
+            3: { key: 'nightmare', class: 'diff-nightmare' },
+            4: { key: 'hell', class: 'diff-hell' },
+            5: { key: 'impossible', class: 'diff-inferno' }
+        };
+
+        function calculateDamage(baseDamage) {
+            if (Math.random() < game.criticalChance) {
+                return { damage: baseDamage * 1.25, isCritical: true };
+            }
+            return { damage: baseDamage, isCritical: false };
+        }
+
+        function useAbility() {
+            if (!game.abilityReady || game.abilityCooldown > 0) return;
+            
+            game.abilityReady = false;
+            game.lastAbilityUse = Date.now();
+            game.abilityCooldown = 30;
+            
+            const meteorX = canvas.width / 2;
+            const meteorY = canvas.height / 2;
+            
+            let hitCount = 0;
+            for (const enemy of game.enemies) {
+                if (enemy.dead) continue;
+                const dist = Math.sqrt((enemy.x - meteorX) ** 2 + (enemy.y - meteorY) ** 2);
+                if (dist < 200) {
+                    const damage = 200 * (1 - dist / 200);
+                    enemy.takeDamage(damage);
+                    hitCount++;
+                }
+            }
+            
+            game.effects.push({ x: meteorX, y: meteorY, text: '☄️ ' + t('meteor'), color: '#e74c3c', life: 60 });
+            
+            if (hitCount > 0) {
+                game.effects.push({ x: meteorX, y: meteorY + 30, text: `💥 ${hitCount} ${t('hit')}`, color: '#f39c12', life: 50 });
+            }
+            
+            updateUI();
+        }
+
+        function showBossWarning() {
+            if (game.bossWarningActive) return;
+            
+            game.bossWarningActive = true;
+            const warning = document.createElement('div');
+            warning.className = 'boss-warning';
+            warning.textContent = t('bossWarning');
+            document.body.appendChild(warning);
+            
+            setTimeout(() => {
+                warning.remove();
+                game.bossWarningActive = false;
+            }, 3000);
+        }
+
+        function showAchievement(titleKey, description) {
+            const popup = document.createElement('div');
+            popup.className = 'achievement-popup';
+            popup.innerHTML = `<div>🏆 ${t(titleKey)}</div><div style="font-size: 14px; margin-top: 5px;">${description}</div>`;
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 3000);
+        }
+
+        function updateAbilityCooldown() {
+            const now = Date.now();
+            const elapsed = (now - game.lastAbilityUse) / 1000;
+            game.abilityCooldown = Math.max(0, 30 - elapsed);
+            
+            const btn = document.getElementById('ability-btn');
+            if (game.abilityCooldown <= 0) {
+                game.abilityReady = true;
+                btn.disabled = false;
+                btn.classList.add('ready');
+                btn.innerHTML = '⚡ ' + t('power');
+            } else {
+                game.abilityReady = false;
+                btn.disabled = true;
+                btn.classList.remove('ready');
+                btn.innerHTML = `⚡ ${Math.ceil(game.abilityCooldown)}s`;
+            }
+        }
+
+        function setupCanvas() {
+            const gameArea = document.getElementById('game-area');
+            const shopPanel = document.getElementById('shop-panel');
+            canvas.width = gameArea.offsetWidth - shopPanel.offsetWidth;
+            canvas.height = gameArea.offsetHeight;
+            generatePath();
+        }
+
+        function generatePath() {
+            const path = [];
+            const startX = 60;
+            const endX = canvas.width - 60;
+            const centerY = canvas.height / 2;
+            const stage = game.stage;
+            const amplitude = Math.min(canvas.height * 0.35, 150);
+            
+            if (stage === 1) {
+                path.push({ x: startX, y: centerY });
+                path.push({ x: startX + (endX - startX) * 0.1, y: centerY - amplitude * 0.8 });
+                path.push({ x: startX + (endX - startX) * 0.2, y: centerY + amplitude * 0.9 });
+                path.push({ x: startX + (endX - startX) * 0.35, y: centerY - amplitude });
+                path.push({ x: startX + (endX - startX) * 0.5, y: centerY + amplitude * 0.7 });
+                path.push({ x: startX + (endX - startX) * 0.65, y: centerY - amplitude * 0.9 });
+                path.push({ x: startX + (endX - startX) * 0.8, y: centerY + amplitude * 0.8 });
+                path.push({ x: startX + (endX - startX) * 0.9, y: centerY - amplitude * 0.5 });
+                path.push({ x: endX, y: centerY });
+            } else if (stage === 2) {
+                path.push({ x: startX, y: centerY + amplitude * 0.5 });
+                for (let i = 1; i <= 10; i++) {
+                    const progress = i / 11;
+                    const x = startX + (endX - startX) * progress;
+                    const yOffset = (i % 2 === 0 ? 1 : -1) * amplitude * (0.8 + Math.random() * 0.2);
+                    path.push({ x, y: centerY + yOffset });
+                }
+                path.push({ x: endX, y: centerY });
+            } else {
+                const segments = 10 + stage * 2;
+                path.push({ x: startX, y: centerY });
+                for (let i = 1; i < segments; i++) {
+                    const progress = i / segments;
+                    const x = startX + (endX - startX) * progress;
+                    const yOffset = (i % 2 === 0 ? 1 : -1) * amplitude * (0.7 + Math.random() * 0.3);
+                    path.push({ x, y: centerY + yOffset });
+                }
+                path.push({ x: endX, y: centerY });
+            }
+            
+            game.path = path;
+        }
+
+        function getDifficultyMultiplier() { return 1 + (game.stage - 1) * 0.4; }
+        function getSpeedMultiplier() { return 1 + (game.stage - 1) * 0.15; }
+
+        class Enemy {
+            constructor(type) {
+                const config = enemyTypes[type];
+                const diffMult = getDifficultyMultiplier();
+                const speedMult = getSpeedMultiplier();
+                const goldMult = getGoldMultiplier(game.stage);
+                
+                this.type = type;
+                this.emoji = config.emoji;
+                this.maxHealth = Math.floor(config.health * (1 + game.wave * 0.15) * diffMult);
+                this.health = this.maxHealth;
+                this.baseSpeed = config.speed * speedMult;
+                this.speed = this.baseSpeed;
+                this.damage = Math.floor(config.damage * diffMult);
+                this.gold = Math.floor(config.gold * goldMult);
+                this.pathIndex = 0;
+                this.x = game.path[0].x;
+                this.y = game.path[0].y;
+                this.size = type === 'boss' ? 50 : 38;
+                this.dead = false;
+                this.armor = type === 'boss' ? 0.3 : (type === 'demon' ? 0.2 : 0);
+                this.slowed = false;
+                this.slowTimer = 0;
+                this.poisoned = false;
+                this.poisonDamage = 0;
+                this.poisonTimer = 0;
+            }
+
+            update() {
+                if (this.dead) return;
+
+                if (this.poisoned && this.poisonTimer > 0) {
+                    this.poisonTimer -= game.gameSpeed;
+                    if (Math.random() < 0.05 * game.gameSpeed) {
+                        this.health -= this.poisonDamage;
+                        game.effects.push({ x: this.x + (Math.random() - 0.5) * 15, y: this.y - 15, text: `☠️${Math.floor(this.poisonDamage)}`, color: '#6c3483', life: 20 });
+                        if (this.health <= 0) { this.dead = true; game.gold += this.gold; game.kills++; updateUI(); return; }
+                    }
+                } else { this.poisoned = false; }
+
+                if (this.slowed && this.slowTimer > 0) { this.slowTimer -= game.gameSpeed; this.speed = this.baseSpeed * 0.5; }
+                else { this.slowed = false; this.speed = this.baseSpeed; }
+
+                const target = game.path[this.pathIndex + 1];
+                if (!target) { this.reachCastle(); return; }
+
+                const dx = target.x - this.x;
+                const dy = target.y - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 10) {
+                    this.pathIndex++;
+                    if (this.pathIndex >= game.path.length - 1) this.reachCastle();
+                } else {
+                    const currentSpeed = this.speed * game.gameSpeed;
+                    this.x += (dx / dist) * currentSpeed;
+                    this.y += (dy / dist) * currentSpeed;
+                }
+            }
+
+            reachCastle() {
+                if (this.dead) return;
+                this.dead = true;
+                game.health -= this.damage;
+                updateUI();
+                if (game.health <= 0) { game.health = 0; endGame(false); }
+            }
+
+            draw() {
+                if (this.dead) return;
+
+                ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                ctx.beginPath();
+                ctx.ellipse(this.x, this.y + 22, 18, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.font = `${this.size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.emoji, this.x, this.y);
+
+                if (this.slowed) { ctx.fillStyle = 'rgba(116, 185, 255, 0.4)'; ctx.beginPath(); ctx.arc(this.x, this.y, 25, 0, Math.PI * 2); ctx.fill(); }
+                if (this.poisoned) { ctx.fillStyle = 'rgba(108, 52, 131, 0.4)'; ctx.beginPath(); ctx.arc(this.x, this.y, 22, 0, Math.PI * 2); ctx.fill(); }
+
+                const barWidth = 46, barHeight = 8;
+                const healthPct = this.health / this.maxHealth;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(this.x - barWidth/2 - 2, this.y - 30, barWidth + 4, barHeight + 4);
+                ctx.fillStyle = healthPct > 0.6 ? '#2ecc71' : healthPct > 0.3 ? '#f39c12' : '#e74c3c';
+                ctx.fillRect(this.x - barWidth/2, this.y - 28, barWidth * healthPct, barHeight);
+                
+                if (this.armor > 0) { ctx.fillStyle = '#ecf0f1'; ctx.font = 'bold 10px Arial'; ctx.fillText('🛡️', this.x + 20, this.y - 25); }
+            }
+
+            takeDamage(dmg, heroType = null) {
+                if (this.dead) return;
+                
+                const finalDamage = dmg * (1 - this.armor);
+                this.health -= finalDamage;
+                
+                if (heroType === 'frost') { this.slowed = true; this.slowTimer = 120; }
+                if (heroType === 'necro') { this.poisoned = true; this.poisonDamage = dmg * 0.3; this.poisonTimer = 180; }
+                
+                game.effects.push({ x: this.x + (Math.random() - 0.5) * 20, y: this.y - 20, text: `-${Math.floor(finalDamage)}`, color: '#ff6b6b', life: 25 });
+                
+                if (this.health <= 0) {
+                    this.dead = true;
+                    game.gold += this.gold;
+                    game.kills++;
+                    
+                    if (game.kills === 100 && !game.achievements.includes('kills100')) {
+                        showAchievement('kills100', '+200 ' + t('gold'));
+                        game.gold += 200;
+                        game.achievements.push('kills100');
+                    }
+                    if (game.kills === 500 && !game.achievements.includes('kills500')) {
+                        showAchievement('kills500', '+1000 ' + t('gold'));
+                        game.gold += 1000;
+                        game.achievements.push('kills500');
+                    }
+                    
+                    game.effects.push({ x: this.x, y: this.y, text: `+${this.gold}💰`, color: '#f1c40f', life: 35 });
+                    updateUI();
+                }
+            }
+        }
+
+        class Hero {
+            constructor(type, x, y) {
+                const config = heroTypes[type];
+                this.type = type;
+                this.heroType = config.type;
+                this.image = config.image;
+                this.x = x;
+                this.y = y;
+                this.baseCost = config.cost;
+                this.baseDamage = config.damage;
+                this.damage = config.damage;
+                this.baseRange = config.range;
+                this.range = config.range;
+                this.baseAttackSpeed = config.attackSpeed;
+                this.attackSpeed = config.attackSpeed;
+                this.color = config.color;
+                this.lastAttack = 0;
+                this.lastGoldTick = 0;
+                this.level = 1;
+                this.upgradeCost = Math.floor(config.cost * 0.5);
+                this.target = null;
+                this.totalInvested = config.cost;
+                
+                if (type === 'farm') { this.goldPerTick = config.goldPerTick; this.tickInterval = config.attackSpeed; }
+            }
+
+            getSellPrice() { return Math.floor(this.totalInvested * 0.5); }
+
+            getDamageWithBuffs() {
+                let damage = this.damage;
+                for (const hero of game.heroes) {
+                    if (hero.type === 'paladin' && hero !== this) {
+                        const dist = Math.sqrt((this.x - hero.x) ** 2 + (this.y - hero.y) ** 2);
+                        if (dist < 150) { damage *= 1.2; break; }
+                    }
+                }
+                return damage;
+            }
+
+            update() {
+                const now = Date.now();
+                
+                if (this.type === 'farm') {
+                    if (!game.waveActive) { this.lastGoldTick = now; return; }
+                    if (this.lastGoldTick === 0) this.lastGoldTick = now;
+                    const adjustedInterval = this.tickInterval / game.gameSpeed;
+                    if (now - this.lastGoldTick >= adjustedInterval) {
+                        game.gold += this.goldPerTick;
+                        game.effects.push({ x: this.x, y: this.y - 30, text: `+${this.goldPerTick}💰`, color: '#f39c12', life: 30 });
+                        this.lastGoldTick = now;
+                        updateUI();
+                    }
+                    return;
+                }
+                
+                if (this.type === 'cleric' && game.health < 100 && game.health > 0) {
+                    const adjustedSpeed = this.attackSpeed / game.gameSpeed;
+                    if (now - this.lastAttack > adjustedSpeed) { game.health = Math.min(100, game.health + 1 + this.level); updateUI(); }
+                }
+
+                if (this.type === 'druid') {
+                    const adjustedSpeed = this.attackSpeed / game.gameSpeed;
+                    if (now - this.lastAttack > adjustedSpeed) {
+                        if (game.health < 100 && game.health > 0) { game.health = Math.min(100, game.health + 0.5 + this.level * 0.5); updateUI(); }
+                    }
+                }
+
+                const adjustedAttackSpeed = this.attackSpeed / game.gameSpeed;
+                if (now - this.lastAttack > adjustedAttackSpeed) {
+                    this.target = this.findTarget();
+                    if (this.target) { this.attack(this.target); this.lastAttack = now; }
+                }
+            }
+
+            findTarget() {
+                if (this.type === 'farm') return null;
+                let closest = null, closestDist = this.range;
+                for (const enemy of game.enemies) {
+                    if (enemy.dead) continue;
+                    const dx = enemy.x - this.x, dy = enemy.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist <= closestDist) { closestDist = dist; closest = enemy; }
+                }
+                return closest;
+            }
+
+            attack(enemy) {
+                const damage = this.getDamageWithBuffs();
+                game.projectiles.push(new Projectile(this.x, this.y - 10, enemy, damage, this.color, this.type));
+            }
+
+            draw() {
+                if (this.type !== 'farm' && this.range > 0) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color + '15';
+                    ctx.fill();
+                    ctx.strokeStyle = this.color + '50';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+
+                if (this.type === 'paladin') {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 150, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#f39c12';
+                    ctx.setLineDash([5, 5]);
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+
+                if (this.target && !this.target.dead) {
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(this.target.x, this.target.y);
+                    ctx.strokeStyle = this.color;
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+
+                const baseSize = this.type === 'farm' ? 35 : 30;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y + 12, baseSize, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y + 12, baseSize - 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fill();
+
+                const imgSize = this.type === 'farm' ? 50 : 44;
+                ctx.font = `${imgSize}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.image, this.x, this.y - 5);
+
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x + 25, this.y - 22, 15, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = ['templar', 'ninja', 'druid', 'lightning'].includes(this.type) ? '#1a1a2e' : '#fff';
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText(this.level, this.x + 25, this.y - 22);
+
+                if (this.type === 'farm') {
+                    if (!game.waveActive) {
+                        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                        ctx.fillRect(this.x - 30, this.y + 35, 60, 18);
+                        ctx.fillStyle = '#f39c12';
+                        ctx.font = 'bold 10px Arial';
+                        ctx.fillText('⏸️ ' + t('paused'), this.x, this.y + 46);
+                    } else {
+                        ctx.fillStyle = '#27ae60';
+                        ctx.font = 'bold 11px Arial';
+                        ctx.fillText(`+${this.goldPerTick}💰/${(this.tickInterval/1000).toFixed(0)}s`, this.x, this.y + 45);
+                    }
+                }
+            }
+
+            upgrade() {
+                if (game.gold >= this.upgradeCost) {
+                    game.gold -= this.upgradeCost;
+                    this.totalInvested += this.upgradeCost;
+                    this.level++;
+                    
+                    if (this.type === 'farm') {
+                        this.goldPerTick = this.goldPerTick + 3;
+                        this.tickInterval = Math.max(5000, this.tickInterval - 1000);
+                    } else {
+                        this.damage = Math.floor(this.baseDamage * (1 + (this.level - 1) * 0.5));
+                        this.range = Math.floor(this.baseRange * (1 + (this.level - 1) * 0.15));
+                        this.attackSpeed = Math.max(200, Math.floor(this.baseAttackSpeed * Math.pow(0.85, this.level - 1)));
+                    }
+                    
+                    this.upgradeCost = Math.floor(this.upgradeCost * 1.8);
+                    updateUI();
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        class Projectile {
+            constructor(x, y, target, damage, color, type) {
+                this.x = x; this.y = y; this.target = target; this.baseDamage = damage;
+                this.color = color; this.type = type; this.baseSpeed = 12; this.speed = this.baseSpeed;
+                this.size = type === 'mage' || type === 'bomber' ? 12 : (type === 'templar' || type === 'cannon' ? 10 : 8);
+                this.dead = false;
+                const dmgCalc = calculateDamage(damage);
+                this.damage = dmgCalc.damage; this.isCritical = dmgCalc.isCritical;
+            }
+
+            update() {
+                if (this.dead || !this.target || this.target.dead) { this.dead = true; return; }
+                const dx = this.target.x - this.x, dy = this.target.y - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 25) {
+                    if (this.type === 'mage' || this.type === 'bomber') {
+                        const aoeRange = this.type === 'bomber' ? 100 : 80;
+                        for (const enemy of game.enemies) {
+                            if (enemy.dead) continue;
+                            const edist = Math.sqrt((enemy.x - this.x) ** 2 + (enemy.y - this.y) ** 2);
+                            if (edist < aoeRange) enemy.takeDamage(this.damage * (1 - edist / (aoeRange + 20)), this.type);
+                        }
+                    } else if (this.type === 'lightning') {
+                        let hitCount = 0;
+                        const maxChain = 3;
+                        let lastPos = { x: this.x, y: this.y };
+                        for (const enemy of game.enemies) {
+                            if (enemy.dead || hitCount >= maxChain) continue;
+                            const edist = Math.sqrt((enemy.x - lastPos.x) ** 2 + (enemy.y - lastPos.y) ** 2);
+                            if (edist < 120) {
+                                enemy.takeDamage(this.damage * (1 - hitCount * 0.2), this.type);
+                                lastPos = { x: enemy.x, y: enemy.y }; hitCount++;
+                            }
+                        }
+                    } else {
+                        this.target.takeDamage(this.damage, this.type);
+                        if (this.isCritical) game.effects.push({ x: this.target.x, y: this.target.y - 35, text: '💥 ' + t('crit'), color: '#f39c12', life: 30 });
+                    }
+                    this.dead = true;
+                } else {
+                    const currentSpeed = this.baseSpeed * game.gameSpeed;
+                    this.x += (dx / dist) * currentSpeed; this.y += (dy / dist) * currentSpeed;
+                }
+            }
+
+            draw() {
+                if (this.dead) return;
+                if (this.isCritical) { ctx.shadowBlur = 8; ctx.shadowColor = '#f39c12'; }
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.isCritical ? '#f39c12' : this.color;
+                ctx.fill();
+                
+                if (!['frost', 'necro', 'lightning', 'templar'].includes(this.type)) {
+                    ctx.beginPath();
+                    ctx.arc(this.x - 2, this.y - 2, this.size * 0.4, 0, Math.PI * 2);
+                    ctx.fillStyle = '#fff';
+                    ctx.fill();
+                }
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function drawBackground() {
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            if (game.stage === 1) { gradient.addColorStop(0, '#87CEEB'); gradient.addColorStop(0.3, '#90EE90'); gradient.addColorStop(1, '#228B22'); }
+            else if (game.stage === 2) { gradient.addColorStop(0, '#6BB3D9'); gradient.addColorStop(0.3, '#7CB342'); gradient.addColorStop(1, '#1B5E20'); }
+            else if (game.stage === 3) { gradient.addColorStop(0, '#5D4E8C'); gradient.addColorStop(0.3, '#4A6741'); gradient.addColorStop(1, '#2E4A2E'); }
+            else if (game.stage === 4) { gradient.addColorStop(0, '#4A3B5C'); gradient.addColorStop(0.3, '#3D4A3A'); gradient.addColorStop(1, '#1A2E1A'); }
+            else { gradient.addColorStop(0, '#2C1810'); gradient.addColorStop(0.3, '#1A1A1A'); gradient.addColorStop(1, '#0D0D0D'); }
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.font = '28px Arial'; ctx.textAlign = 'center';
+            const treeEmoji = game.stage >= 4 ? '🌲' : '🌳';
+            const deadTree = game.stage >= 5 ? '🪨' : '🌲';
+            for (let i = 0; i < 12; i++) {
+                ctx.fillText(deadTree, 40 + i * (canvas.width / 12), 35);
+                ctx.fillText(treeEmoji, 60 + i * (canvas.width / 12), canvas.height - 25);
+            }
+        }
+
+        function drawPath() {
+            if (game.path.length < 2) return;
+            ctx.beginPath();
+            ctx.moveTo(game.path[0].x, game.path[0].y);
+            for (let i = 1; i < game.path.length; i++) ctx.lineTo(game.path[i].x, game.path[i].y);
+            ctx.strokeStyle = game.stage >= 4 ? '#3D2817' : '#5D4037';
+            ctx.lineWidth = 55; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(game.path[0].x, game.path[0].y);
+            for (let i = 1; i < game.path.length; i++) ctx.lineTo(game.path[i].x, game.path[i].y);
+            ctx.strokeStyle = game.stage >= 4 ? '#5C4033' : '#8B7355';
+            ctx.lineWidth = 45; ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(game.path[0].x, game.path[0].y);
+            for (let i = 1; i < game.path.length; i++) ctx.lineTo(game.path[i].x, game.path[i].y);
+            ctx.strokeStyle = game.stage >= 4 ? '#6B5344' : '#A89070';
+            ctx.lineWidth = 35; ctx.stroke();
+        }
+
+        function drawStructures() {
+            if (game.path.length < 2) return;
+            const start = game.path[0], end = game.path[game.path.length - 1];
+
+            const caveEmoji = game.stage >= 4 ? '🌋' : (game.stage >= 3 ? '⛰️' : '🏚️');
+            const caveName = game.stage >= 4 ? t('infernoPortal') : (game.stage >= 3 ? t('cursedMountain') : t('evilLair'));
+
+            ctx.font = '70px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(caveEmoji, start.x, start.y - 15);
+            ctx.font = 'bold 12px Arial';
+            ctx.fillStyle = '#8B0000'; ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+            ctx.strokeText(caveName, start.x, start.y + 50);
+            ctx.fillText(caveName, start.x, start.y + 50);
+
+            ctx.font = '70px Arial';
+            ctx.fillText('🏰', end.x, end.y - 15);
+            ctx.font = 'bold 12px Arial';
+            ctx.fillStyle = '#1E90FF';
+            ctx.strokeText(t('yourCastle'), end.x, end.y + 50);
+            ctx.fillText(t('yourCastle'), end.x, end.y + 50);
+
+            const barWidth = 80, healthPct = game.health / 100;
+            ctx.fillStyle = '#000';
+            ctx.fillRect(end.x - barWidth/2 - 2, end.y + 62, barWidth + 4, 12);
+            ctx.fillStyle = healthPct > 0.5 ? '#2ecc71' : healthPct > 0.25 ? '#f39c12' : '#e74c3c';
+            ctx.fillRect(end.x - barWidth/2, end.y + 64, barWidth * healthPct, 8);
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 8px Arial';
+            ctx.fillText(`${Math.floor(game.health)}/100`, end.x, end.y + 68);
+        }
+
+        function drawEffects() {
+            game.effects = game.effects.filter(e => {
+                e.life -= game.gameSpeed; e.y -= game.gameSpeed;
+                ctx.font = 'bold 16px Arial'; ctx.fillStyle = e.color;
+                ctx.textAlign = 'center';
+                ctx.globalAlpha = Math.max(0, e.life / 35);
+                ctx.fillText(e.text, e.x, e.y);
+                ctx.globalAlpha = 1;
+                return e.life > 0;
+            });
+        }
+
+        function createShop() {
+            const shop = document.getElementById('hero-shop');
+            shop.innerHTML = '';
+
+            for (const [catKey, category] of Object.entries(heroCategories)) {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'shop-category';
+                
+                const header = document.createElement('div');
+                header.className = `category-header ${catKey}`;
+                header.innerHTML = `
+                    <div><span class="category-icon">${category.icon}</span>${t(catKey)}<span class="category-count">${category.heroes.length}</span></div>
+                    <span class="category-arrow">▼</span>
+                `;
+                
+                const content = document.createElement('div');
+                content.className = `category-content ${catKey}`;
+                content.id = `category-${catKey}`;
+                
+                for (const heroKey of category.heroes) {
+                    const config = heroTypes[heroKey];
+                    if (!config) continue;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'hero-card';
+                    if (catKey === 'legendary') card.classList.add('legendary');
+                    card.dataset.type = heroKey;
+                    
+                    let statsHTML = '';
+                    if (config.damage > 0) statsHTML += `<div class="hero-stat-line"><span>⚔️ ${t('damage')}:</span><span>${config.damage}</span></div>`;
+                    if (config.range > 0) statsHTML += `<div class="hero-stat-line"><span>🎯 ${t('range')}:</span><span>${config.range}</span></div>`;
+                    if (config.type === 'economy') {
+                        statsHTML += `<div class="hero-stat-line"><span>💰 ${t('income')}:</span><span>${config.goldPerTick}</span></div>`;
+                        statsHTML += `<div class="hero-stat-line"><span>⏱️ ${t('interval')}:</span><span>${(config.attackSpeed/1000).toFixed(0)}s</span></div>`;
+                    } else {
+                        statsHTML += `<div class="hero-stat-line"><span>⚡ ${t('speed')}:</span><span>${(config.attackSpeed/1000).toFixed(2)}s</span></div>`;
+                    }
+                    statsHTML += `<div style="margin-top:5px;font-size:10px;color:#95a5a6;">${t(heroKey + 'Desc')}</div>`;
+                    
+                    let costStyle = catKey === 'legendary' ? 'background: linear-gradient(135deg, #f1c40f, #e67e22);' : '';
+                    let badge = catKey === 'legendary' ? '<span class="hero-type-badge badge-legendary">⭐</span>' : '';
+                    
+                    card.innerHTML = `
+                        <div class="hero-header">
+                            <div style="display:flex;align-items:center;">
+                                <span class="hero-icon">${config.image}</span>
+                                <span class="hero-name">${t(heroKey)}</span>${badge}
+                            </div>
+                            <span class="hero-cost" style="${costStyle}">💰${config.cost}</span>
+                        </div>
+                        <div class="hero-stats">${statsHTML}</div>
+                    `;
+
+                    card.addEventListener('click', (e) => { e.stopPropagation(); selectHeroFromShop(heroKey); });
+                    content.appendChild(card);
+                }
+                
+                header.addEventListener('click', () => { header.classList.toggle('active'); content.classList.toggle('active'); });
+                categoryDiv.appendChild(header);
+                categoryDiv.appendChild(content);
+                shop.appendChild(categoryDiv);
+            }
+        }
+
+        function selectHeroFromShop(type) {
+            closeUpgradeMenu();
+            if (game.gold < heroTypes[type].cost) return;
+            if (game.selectedHeroType === type) game.selectedHeroType = null;
+            else game.selectedHeroType = type;
+            document.querySelectorAll('.hero-card').forEach(card => card.classList.toggle('selected', card.dataset.type === game.selectedHeroType));
+        }
+
+        function isOnPath(x, y) {
+            for (let i = 0; i < game.path.length - 1; i++) {
+                const p1 = game.path[i], p2 = game.path[i + 1];
+                const dx = p2.x - p1.x, dy = p2.y - p1.y;
+                const lenSq = dx * dx + dy * dy;
+                const t = Math.max(0, Math.min(1, ((x - p1.x) * dx + (y - p1.y) * dy) / lenSq));
+                const closestX = p1.x + t * dx, closestY = p1.y + t * dy;
+                const dist = Math.sqrt((x - closestX) ** 2 + (y - closestY) ** 2);
+                if (dist < 50) return true;
+            }
+            return false;
+        }
+
+        function isNearHero(x, y) {
+            for (const hero of game.heroes) {
+                const dist = Math.sqrt((x - hero.x) ** 2 + (y - hero.y) ** 2);
+                if (dist < 70) return true;
+            }
+            return false;
+        }
+
+        function findHeroAt(x, y) {
+            for (const hero of game.heroes) {
+                const dist = Math.sqrt((x - hero.x) ** 2 + (y - hero.y) ** 2);
+                if (dist < 50) return hero;
+            }
+            return null;
+        }
+
+        function openUpgradeMenu(hero, screenX, screenY) {
+            game.selectedHeroForUpgrade = hero;
+            let menuX = screenX + 20, menuY = screenY - 100;
+            if (menuX + 250 > window.innerWidth) menuX = screenX - 250;
+            if (menuY < 80) menuY = screenY + 20;
+            if (menuY + 300 > window.innerHeight) menuY = window.innerHeight - 310;
+            game.menuPosition = { x: menuX, y: menuY };
+            updateUpgradeMenuContent();
+            upgradeMenu.style.left = menuX + 'px';
+            upgradeMenu.style.top = menuY + 'px';
+            upgradeMenu.style.display = 'block';
+        }
+
+        function updateUpgradeMenuContent() {
+            const hero = game.selectedHeroForUpgrade;
+            if (!hero) return;
+            document.getElementById('menu-hero-name').textContent = `${hero.image} ${t(hero.type)}`;
+            const statsDiv = document.getElementById('menu-stats');
+            
+            if (hero.type === 'farm') {
+                const nextGold = hero.goldPerTick + 3;
+                const nextTime = Math.max(5000, hero.tickInterval - 1000);
+                statsDiv.innerHTML = `
+                    <div>💰 ${t('income')}: <span style="color:#f39c12">${hero.goldPerTick}</span></div>
+                    <div>⏱️ ${t('interval')}: <span style="color:#3498db">${(hero.tickInterval/1000).toFixed(0)}s</span></div>
+                    <div>⭐ ${t('level')}: <span style="color:#e74c3c">${hero.level}</span></div>
+                    <div>💵 ${t('invested')}: <span style="color:#95a5a6">${hero.totalInvested}💰</span></div>
+                    <div style="color:#9b59b6;font-size:12px;margin-top:5px;">${t('next')}: ${nextGold}💰 / ${(nextTime/1000).toFixed(0)}s</div>
+                `;
+            } else {
+                statsDiv.innerHTML = `
+                    <div>⚔️ ${t('damage')}: <span style="color:#e74c3c">${hero.damage}</span></div>
+                    <div>🎯 ${t('range')}: <span style="color:#3498db">${hero.range}</span></div>
+                    <div>⚡ ${t('speed')}: <span style="color:#f39c12">${(hero.attackSpeed / 1000).toFixed(2)}s</span></div>
+                    <div>⭐ ${t('level')}: <span style="color:#9b59b6">${hero.level}</span></div>
+                    <div>💵 ${t('invested')}: <span style="color:#95a5a6">${hero.totalInvested}💰</span></div>
+                `;
+            }
+            
+            document.getElementById('upgrade-cost').textContent = hero.upgradeCost;
+            document.getElementById('sell-price').textContent = hero.getSellPrice();
+            document.getElementById('upgrade-btn').disabled = game.gold < hero.upgradeCost;
+        }
+
+        function closeUpgradeMenu() { upgradeMenu.style.display = 'none'; game.selectedHeroForUpgrade = null; }
+
+        function sellHero(hero) {
+            const sellPrice = hero.getSellPrice();
+            game.gold += sellPrice;
+            game.effects.push({ x: hero.x, y: hero.y - 30, text: `💸 +${sellPrice}💰`, color: '#e67e22', life: 40 });
+            const index = game.heroes.indexOf(hero);
+            if (index > -1) game.heroes.splice(index, 1);
+            closeUpgradeMenu();
+            updateUI();
+        }
+
+        document.getElementById('upgrade-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (game.selectedHeroForUpgrade && game.selectedHeroForUpgrade.upgrade()) {
+                updateUpgradeMenuContent();
+                game.effects.push({ x: game.selectedHeroForUpgrade.x, y: game.selectedHeroForUpgrade.y - 30, text: `⬆️ ${t('level').toUpperCase()} ${game.selectedHeroForUpgrade.level}!`, color: '#2ecc71', life: 40 });
+            }
+        });
+
+        document.getElementById('sell-btn').addEventListener('click', (e) => { e.stopPropagation(); if (game.selectedHeroForUpgrade) sellHero(game.selectedHeroForUpgrade); });
+        document.getElementById('close-menu-btn').addEventListener('click', (e) => { e.stopPropagation(); closeUpgradeMenu(); });
+        document.getElementById('ability-btn').addEventListener('click', (e) => { e.stopPropagation(); useAbility(); });
+
+        canvas.addEventListener('click', (e) => {
+            if (game.gameOver || game.stagePaused) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left, y = e.clientY - rect.top;
+
+            const clickedHero = findHeroAt(x, y);
+            if (clickedHero) {
+                game.selectedHeroType = null;
+                document.querySelectorAll('.hero-card').forEach(c => c.classList.remove('selected'));
+                openUpgradeMenu(clickedHero, e.clientX, e.clientY);
+                return;
+            }
+
+            closeUpgradeMenu();
+
+            if (game.selectedHeroType) {
+                if (isOnPath(x, y)) { game.effects.push({ x, y, text: '❌ ' + t('cannotPlace'), color: '#e74c3c', life: 30 }); return; }
+                if (isNearHero(x, y)) { game.effects.push({ x, y, text: '❌ ' + t('tooClose'), color: '#e74c3c', life: 30 }); return; }
+
+                const config = heroTypes[game.selectedHeroType];
+                if (game.gold >= config.cost) {
+                    game.heroes.push(new Hero(game.selectedHeroType, x, y));
+                    game.gold -= config.cost;
+                    game.effects.push({ x, y, text: `✅ ${t(game.selectedHeroType)}!`, color: '#2ecc71', life: 30 });
+                    game.selectedHeroType = null;
+                    document.querySelectorAll('.hero-card').forEach(c => c.classList.remove('selected'));
+                    updateUI();
+                }
+            }
+        });
+
+        document.addEventListener('click', (e) => { if (!upgradeMenu.contains(e.target) && e.target !== canvas) closeUpgradeMenu(); });
+        document.getElementById('speed-btn').addEventListener('click', toggleSpeed);
+
+        function toggleSpeed() {
+            const btn = document.getElementById('speed-btn');
+            if (game.gameSpeed === 1) { game.gameSpeed = 2; btn.textContent = '⚡ 2x'; btn.classList.add('active'); }
+            else { game.gameSpeed = 1; btn.textContent = '⚡ 1x'; btn.classList.remove('active'); }
+        }
+
+        document.getElementById('auto-wave-btn').addEventListener('click', toggleAutoWave);
+
+        function toggleAutoWave() {
+            game.autoWave = !game.autoWave;
+            const btn = document.getElementById('auto-wave-btn');
+            if (game.autoWave) {
+                btn.textContent = '🔄 ' + t('autoOn');
+                btn.classList.add('active');
+                if (!game.waveActive && !game.gameOver && !game.stagePaused && game.wave < game.maxWaves) setTimeout(startWave, 500);
+            } else {
+                btn.textContent = '🔄 ' + t('autoOff');
+                btn.classList.remove('active');
+            }
+        }
+
+        document.getElementById('start-wave-btn').addEventListener('click', startWave);
+
+        function startWave() {
+            if (game.waveActive || game.gameOver || game.stagePaused) return;
+            game.wave++; game.waveActive = true; game.enemiesSpawned = 0;
+            document.getElementById('start-wave-btn').disabled = true;
+
+            const now = Date.now();
+            for (const hero of game.heroes) { if (hero.type === 'farm') hero.lastGoldTick = now; }
+
+            let enemyCount, types, speedMult;
+            const stageBonus = game.stage - 1;
+            
+            if (game.wave === 25) showBossWarning();
+            
+            if (game.wave <= 3) { enemyCount = 5 + game.wave * 2 + stageBonus * 3; types = ['goblin']; if (game.stage >= 3) types.push('orc'); speedMult = 1; }
+            else if (game.wave <= 6) { enemyCount = 8 + game.wave * 2 + stageBonus * 4; types = ['goblin', 'orc']; if (game.stage >= 2) types.push('troll'); speedMult = 1.1; }
+            else if (game.wave <= 10) { enemyCount = 12 + game.wave * 2 + stageBonus * 5; types = ['goblin', 'orc', 'troll']; if (game.stage >= 3) types.push('ogre'); speedMult = 1.15; }
+            else if (game.wave <= 15) { enemyCount = 18 + game.wave * 2 + stageBonus * 6; types = ['orc', 'troll', 'ogre']; if (game.stage >= 2) types.push('dragon'); if (game.stage >= 4) types.push('demon'); speedMult = 1.2; }
+            else if (game.wave <= 20) { enemyCount = 25 + game.wave * 2 + stageBonus * 7; types = ['troll', 'ogre', 'dragon']; if (game.stage >= 3) types.push('demon'); speedMult = 1.25; }
+            else if (game.wave <= 24) { enemyCount = 30 + game.wave * 2 + stageBonus * 8; types = ['ogre', 'dragon', 'demon']; speedMult = 1.3; }
+            else { enemyCount = 15 + stageBonus * 5; types = ['dragon', 'demon', 'boss']; speedMult = 1.35; }
+
+            game.totalEnemiesToSpawn = enemyCount;
+
+            const spawnInterval = setInterval(() => {
+                if (game.enemiesSpawned >= enemyCount || game.gameOver) { clearInterval(spawnInterval); return; }
+                const type = types[Math.floor(Math.random() * types.length)];
+                const enemy = new Enemy(type);
+                enemy.baseSpeed *= speedMult;
+                game.enemies.push(enemy);
+                game.enemiesSpawned++;
+            }, 600 / game.gameSpeed);
+
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('health').textContent = Math.max(0, Math.floor(game.health));
+            document.getElementById('gold').textContent = game.gold;
+            document.getElementById('wave').textContent = game.wave;
+            document.getElementById('stage').textContent = game.stage;
+            document.getElementById('kills').textContent = game.kills;
+
+            document.querySelectorAll('.hero-card').forEach(card => {
+                const type = card.dataset.type;
+                if (heroTypes[type]) card.classList.toggle('disabled', game.gold < heroTypes[type].cost);
+            });
+
+            if (game.selectedHeroForUpgrade) updateUpgradeMenuContent();
+        }
+
+        function checkWaveEnd() {
+            if (!game.waveActive || game.gameOver) return;
+            const aliveEnemies = game.enemies.filter(e => !e.dead);
+            
+            if (aliveEnemies.length === 0 && game.enemiesSpawned >= game.totalEnemiesToSpawn) {
+                game.waveActive = false; game.enemies = [];
+                document.getElementById('start-wave-btn').disabled = false;
+
+                const bonus = 30 + game.wave * 10 + game.stage * 20;
+                game.gold += bonus;
+                
+                game.effects.push({ x: canvas.width / 2, y: canvas.height / 2 - 50, text: `🎉 ${t('waveComplete', game.wave)}`, color: '#f1c40f', life: 50 });
+                game.effects.push({ x: canvas.width / 2, y: canvas.height / 2, text: `+${bonus}💰 ${t('bonus')}`, color: '#2ecc71', life: 50 });
+                
+                updateUI();
+
+                if (game.wave >= game.maxWaves) setTimeout(() => showStageComplete(), 1500);
+                else if (game.autoWave) {
+                    game.effects.push({ x: canvas.width / 2, y: canvas.height / 2 + 50, text: `🔄 ${t('nextWaveIn')}`, color: '#9b59b6', life: 60 });
+                    setTimeout(() => { if (game.autoWave && !game.gameOver && !game.stagePaused) startWave(); }, 2000 / game.gameSpeed);
+                }
+            }
+        }
+
+        function showStageComplete() {
+            game.stagePaused = true; game.autoWave = false;
+            document.getElementById('auto-wave-btn').textContent = '🔄 ' + t('autoOff');
+            document.getElementById('auto-wave-btn').classList.remove('active');
+
+            const stageBonus = 500 * game.stage;
+            game.gold += stageBonus;
+            
+            const nextStage = game.stage + 1;
+            const nextDiff = stageDifficulty[Math.min(nextStage, 5)];
+            const currentDiff = stageDifficulty[Math.min(game.stage, 5)];
+            const currentGoldMult = getGoldMultiplier(game.stage);
+            const nextGoldMult = getGoldMultiplier(nextStage);
+
+            const screen = document.createElement('div');
+            screen.className = 'stage-complete-screen';
+            screen.id = 'stage-complete-screen';
+            
+            const totalFarms = game.heroes.filter(h => h.type === 'farm').length;
+            
+            screen.innerHTML = `
+                <div class="stage-complete-box">
+                    <h2>${t('stageComplete', game.stage)}</h2>
+                    <p>${t('difficulty')}: <span class="difficulty-badge ${currentDiff.class}">${t(currentDiff.key)}</span></p>
+                    <div class="stage-bonus">
+                        <div>🎁 ${t('stageBonus')}: +${stageBonus}💰</div>
+                        <div>💰 ${t('totalGold')}: ${game.gold}</div>
+                        <div>⚔️ ${t('heroesCount')}: ${game.heroes.length - totalFarms} | 🌾 ${t('farmsCount')}: ${totalFarms}</div>
+                        <div>💀 ${t('totalKills')}: ${game.kills}</div>
+                    </div>
+                    <div class="gold-multiplier">💰 ${t('currentGold')}: ${currentGoldMult}x → ${t('nextStage')}: ${nextGoldMult}x</div>
+                    <div class="next-stage-info">
+                        <strong>${t('nextStageInfo', nextStage)}</strong><br>
+                        ${t('difficulty')}: <span class="difficulty-badge ${nextDiff.class}">${t(nextDiff.key)}</span><br><br>
+                        ⚠️ ${t('enemiesStronger', Math.floor((getDifficultyMultiplierForStage(nextStage) - 1) * 100))}<br>
+                        💰 ${t('enemiesDrop', nextGoldMult)}<br>
+                        ⚠️ ${t('longerPath')}<br><br>
+                        💡 ${t('heroesRemoved')}<br>
+                        💰 ${t('keepGold')}
+                    </div>
+                    <div class="button-group">
+                        <button class="next-stage-btn" id="next-stage-btn">${t('goToStage', nextStage)}</button>
+                        <button class="stay-btn" id="continue-endless-btn">${t('continueEndless')}</button>
+                    </div>
+                    <div class="button-group">
+                        <button class="restart-btn" id="restart-game-btn">${t('restartZero')}</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(screen);
+
+            document.getElementById('next-stage-btn').addEventListener('click', () => {
+                game.stage++; game.wave = 0; game.heroes = []; game.health = 100;
+                game.stagePaused = false; game.enemies = []; game.projectiles = []; game.kills = 0;
+                document.getElementById('stage-complete-screen').remove();
+                generatePath(); updateUI();
+            });
+
+            document.getElementById('continue-endless-btn').addEventListener('click', () => {
+                game.wave = 0; game.maxWaves = 25; game.stagePaused = false;
+                document.getElementById('stage-complete-screen').remove();
+                updateUI();
+                game.effects.push({ x: canvas.width / 2, y: canvas.height / 2, text: `♾️ ${t('infiniteMode')}`, color: '#3498db', life: 60 });
+            });
+
+            document.getElementById('restart-game-btn').addEventListener('click', () => location.reload());
+            updateUI();
+        }
+
+        function getDifficultyMultiplierForStage(stage) { return 1 + (stage - 1) * 0.4; }
+
+        function restartCurrentStage() {
+            const currentStage = game.stage;
+            game.health = 100; game.gold = getStartingGold(currentStage);
+            game.wave = 0; game.maxWaves = 25; game.enemies = []; game.heroes = [];
+            game.projectiles = []; game.effects = []; game.selectedHeroType = null;
+            game.selectedHeroForUpgrade = null; game.waveActive = false; game.autoWave = false;
+            game.gameOver = false; game.stagePaused = false; game.enemiesSpawned = 0;
+            game.totalEnemiesToSpawn = 0; game.gameSpeed = 1; game.kills = 0;
+            game.abilityCooldown = 0; game.abilityReady = true; game.lastAbilityUse = 0;
+            
+            document.getElementById('auto-wave-btn').textContent = '🔄 ' + t('autoOff');
+            document.getElementById('auto-wave-btn').classList.remove('active');
+            document.getElementById('speed-btn').textContent = '⚡ 1x';
+            document.getElementById('speed-btn').classList.remove('active');
+            document.getElementById('start-wave-btn').disabled = false;
+            
+            const gameOverScreen = document.getElementById('game-over-screen');
+            if (gameOverScreen) gameOverScreen.remove();
+            
+            closeUpgradeMenu(); generatePath(); updateUI(); gameLoop();
+        }
+
+        function endGame(victory) {
+            game.gameOver = true; game.autoWave = false;
+            document.getElementById('auto-wave-btn').textContent = '🔄 ' + t('autoOff');
+            document.getElementById('auto-wave-btn').classList.remove('active');
+
+            const screen = document.createElement('div');
+            screen.className = 'game-over-screen';
+            screen.id = 'game-over-screen';
+            
+            const totalFarms = game.heroes.filter(h => h.type === 'farm').length;
+            const totalWaves = (game.stage - 1) * 25 + game.wave;
+            const currentDiff = stageDifficulty[Math.min(game.stage, 5)];
+            const retryGold = getStartingGold(game.stage);
+            const goldMult = getGoldMultiplier(game.stage);
+            
+            if (victory) {
+                screen.innerHTML = `
+                    <div class="game-over-box" style="border-color: #27ae60">
+                        <h2>${t('victory')}</h2>
+                        <p>${t('stage')}: ${game.stage} <span class="difficulty-badge ${currentDiff.class}">${t(currentDiff.key)}</span></p>
+                        <p>${t('totalWaves')}: ${totalWaves} ⚔️</p>
+                        <p>${t('gold')}: ${game.gold} 💰</p>
+                        <p>${t('kills')}: ${game.kills} 💀</p>
+                        <button class="restart-btn" style="background: linear-gradient(135deg, #27ae60, #229954)">${t('playAgain')}</button>
+                    </div>
+                `;
+                document.body.appendChild(screen);
+                screen.querySelector('.restart-btn').addEventListener('click', () => location.reload());
+            } else {
+                screen.innerHTML = `
+                    <div class="game-over-box">
+                        <h2>${t('gameOver')}</h2>
+                        <p>${t('stage')}: ${game.stage} <span class="difficulty-badge ${currentDiff.class}">${t(currentDiff.key)}</span></p>
+                        <p>${t('wave')}: ${game.wave} / ${game.maxWaves}</p>
+                        <p>${t('totalWaves')}: ${totalWaves} ⚔️</p>
+                        <p>${t('heroesCount')}: ${game.heroes.length - totalFarms} ⚔️ | ${t('farmsCount')}: ${totalFarms} 🌾</p>
+                        <p>${t('kills')}: ${game.kills} 💀</p>
+                        <div class="retry-info">
+                            <strong>🔄 ${t('tryAgain', game.stage)}</strong><br>
+                            💰 ${t('initialGold')}: ${retryGold}<br>
+                            💰 ${t('goldMultiplier')}: ${goldMult}x<br>
+                            ❤️ ${t('health')}: 100 | 🗡️ ${t('noHeroes')}
+                        </div>
+                        <div class="button-group"><button class="retry-btn" id="retry-stage-btn">${t('retryStage', game.stage)}</button></div>
+                        <div class="button-group"><button class="restart-btn" id="restart-game-btn">${t('backToStage1')}</button></div>
+                    </div>
+                `;
+                document.body.appendChild(screen);
+                document.getElementById('retry-stage-btn').addEventListener('click', () => restartCurrentStage());
+                document.getElementById('restart-game-btn').addEventListener('click', () => location.reload());
+            }
+        }
+
+        function gameLoop() {
+            if (game.gameOver) return;
+            drawBackground(); drawPath(); drawStructures();
+            for (const hero of game.heroes) { hero.update(); hero.draw(); }
+            for (const enemy of game.enemies) { if (!enemy.dead) { enemy.update(); enemy.draw(); } }
+            game.projectiles = game.projectiles.filter(p => !p.dead);
+            for (const projectile of game.projectiles) { projectile.update(); projectile.draw(); }
+            drawEffects(); checkWaveEnd(); updateAbilityCooldown();
+
+            const diff = stageDifficulty[Math.min(game.stage, 5)];
+            const goldMult = getGoldMultiplier(game.stage);
+            ctx.font = 'bold 14px Arial'; ctx.fillStyle = '#fff'; ctx.textAlign = 'left';
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+            const speedText = game.gameSpeed > 1 ? ` | ⚡${game.gameSpeed}x` : '';
+            const stageText = `🏰 ${t('stage').toUpperCase()} ${game.stage} - ${t(diff.key)} | 💰 ${goldMult}x ${t('gold').toLowerCase()}${speedText}`;
+            ctx.strokeText(stageText, 15, 25);
+            ctx.fillText(stageText, 15, 25);
+
+            if (game.selectedHeroType && !game.stagePaused) {
+                ctx.font = 'bold 18px Arial'; ctx.fillStyle = '#fff';
+                ctx.strokeStyle = '#000'; ctx.lineWidth = 4; ctx.textAlign = 'center';
+                const config = heroTypes[game.selectedHeroType];
+                const text = `🎯 ${config.image} ${t(game.selectedHeroType)}`;
+                ctx.strokeText(text, canvas.width / 2, canvas.height - 25);
+                ctx.fillText(text, canvas.width / 2, canvas.height - 25);
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function init() {
+            setupCanvas();
+            createShop();
+            document.getElementById('instructions').innerHTML = t('instructions');
+            updateUI();
+            gameLoop();
+        }
+
+        window.addEventListener('load', init);
+        window.addEventListener('resize', () => setupCanvas());
+    </script>
+</body>
+</html>
