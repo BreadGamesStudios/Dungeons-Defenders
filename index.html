@@ -1,1016 +1,1008 @@
- (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
-diff --git a/index.html b/index.html
-index 76de9e173e298e1875d31afa2811829a2e75f450..0b97ecc281ae8c6e045f60c4cc0414594cdd85e0 100644
---- a/index.html
-+++ b/index.html
 @@ -740,50 +740,54 @@
- 
-         .category-count {
-             background: rgba(255,255,255,0.2);
-             padding: 2px 8px;
-             border-radius: 10px;
-             font-size: 11px;
-             margin-left: 8px;
-         }
-     </style>
- </head>
- <body>
-     <div id="ui-panel">
-         <div class="stats">
-             <div class="stat">
-                 <span class="stat-icon">❤️</span>
-                 <span><span data-i18n="health">Vida</span>: <span id="health">100</span></span>
-             </div>
-             <div class="stat">
-                 <span class="stat-icon">💰</span>
-                 <span><span data-i18n="gold">Ouro</span>: <span id="gold">1000</span></span>
-             </div>
-             <div class="stat kills">
-                 <span class="stat-icon">💀</span>
-                 <span><span data-i18n="kills">Mortes</span>: <span id="kills">0</span></span>
-             </div>
-+            <div class="stat combo">
-+                <span class="stat-icon">🔥</span>
-+                <span><span data-i18n="combo">Combo</span>: <span id="combo">x1</span></span>
-+            </div>
-             <div class="stage-info">
-                 🏰 <span data-i18n="stage">Fase</span>: <span id="stage">1</span>
-             </div>
-             <div class="wave-info">
-                 ⚔️ <span data-i18n="wave">Onda</span>: <span id="wave">0</span> / 25
-             </div>
-             <div class="language-selector">
-                 <button class="lang-btn active" data-lang="pt" title="Português">🇧🇷</button>
-                 <button class="lang-btn" data-lang="es" title="Español">🇪🇸</button>
-                 <button class="lang-btn" data-lang="en" title="English">🇺🇸</button>
-             </div>
-         </div>
-         <div class="wave-controls">
-             <button id="ability-btn" title="Habilidade Especial">⚡ <span data-i18n="power">PODER</span></button>
-             <button id="speed-btn">⚡ 1x</button>
-             <button id="auto-wave-btn">🔄 Auto: OFF</button>
-             <button id="start-wave-btn">▶️ <span data-i18n="startWave">Iniciar Onda</span></button>
-         </div>
-     </div>
-     
-     <div id="game-area">
-         <canvas id="game-canvas"></canvas>
-         <div id="shop-panel">
-             <h2 class="shop-title">⚔️ <span data-i18n="heroes">HERÓIS</span> ⚔️</h2>
-             <div id="hero-shop"></div>
+
+        .category-count {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui-panel">
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-icon">❤️</span>
+                <span><span data-i18n="health">Vida</span>: <span id="health">100</span></span>
+            </div>
+            <div class="stat">
+                <span class="stat-icon">💰</span>
+                <span><span data-i18n="gold">Ouro</span>: <span id="gold">1000</span></span>
+            </div>
+            <div class="stat kills">
+                <span class="stat-icon">💀</span>
+                <span><span data-i18n="kills">Mortes</span>: <span id="kills">0</span></span>
+            </div>
+            <div class="stat combo">
+                <span class="stat-icon">🔥</span>
+                <span><span data-i18n="combo">Combo</span>: <span id="combo">x1</span></span>
+            </div>
+            <div class="stage-info">
+                🏰 <span data-i18n="stage">Fase</span>: <span id="stage">1</span>
+            </div>
+            <div class="wave-info">
+                ⚔️ <span data-i18n="wave">Onda</span>: <span id="wave">0</span> / 25
+            </div>
+            <div class="language-selector">
+                <button class="lang-btn active" data-lang="pt" title="Português">🇧🇷</button>
+                <button class="lang-btn" data-lang="es" title="Español">🇪🇸</button>
+                <button class="lang-btn" data-lang="en" title="English">🇺🇸</button>
+            </div>
+        </div>
+        <div class="wave-controls">
+            <button id="ability-btn" title="Habilidade Especial">⚡ <span data-i18n="power">PODER</span></button>
+            <button id="speed-btn">⚡ 1x</button>
+            <button id="auto-wave-btn">🔄 Auto: OFF</button>
+            <button id="start-wave-btn">▶️ <span data-i18n="startWave">Iniciar Onda</span></button>
+        </div>
+    </div>
+    
+    <div id="game-area">
+        <canvas id="game-canvas"></canvas>
+        <div id="shop-panel">
+            <h2 class="shop-title">⚔️ <span data-i18n="heroes">HERÓIS</span> ⚔️</h2>
+            <div id="hero-shop"></div>
 @@ -791,50 +795,51 @@
-         </div>
-     </div>
- 
-     <div id="upgrade-menu">
-         <h3 id="menu-hero-name">🗡️ Guerreiro</h3>
-         <div class="stats-info" id="menu-stats"></div>
-         <div class="menu-buttons">
-             <button id="upgrade-btn">⬆️ UPGRADE (💰<span id="upgrade-cost">50</span>)</button>
-             <button id="sell-btn">💸 <span data-i18n="sell">VENDER</span> (+<span id="sell-price">50</span>💰)</button>
-             <button id="close-menu-btn">✖️ <span data-i18n="close">Fechar</span></button>
-         </div>
-     </div>
- 
-     <script>
-         const canvas = document.getElementById('game-canvas');
-         const ctx = canvas.getContext('2d');
-         const upgradeMenu = document.getElementById('upgrade-menu');
- 
-         // Sistema de Tradução
-         const translations = {
-             pt: {
-                 // UI
-                 health: "Vida",
-                 gold: "Ouro",
-                 kills: "Mortes",
-+                combo: "Combo",
-                 stage: "Fase",
-                 wave: "Onda",
-                 power: "PODER",
-                 startWave: "Iniciar Onda",
-                 heroes: "HERÓIS",
-                 sell: "VENDER",
-                 close: "Fechar",
-                 autoOn: "Auto: ON",
-                 autoOff: "Auto: OFF",
-                 
-                 // Categorias
-                 shooters: "Atiradores",
-                 magic: "Magia",
-                 legendary: "Lendários",
-                 support: "Suporte",
-                 
-                 // Heróis
-                 warrior: "Guerreiro",
-                 archer: "Arqueiro",
-                 assassin: "Assassino",
-                 sniper: "Atirador",
-                 cannon: "Canhão",
-                 bomber: "Bombardeiro",
-                 paladin: "Paladino",
-                 mage: "Mago",
+        </div>
+    </div>
+
+    <div id="upgrade-menu">
+        <h3 id="menu-hero-name">🗡️ Guerreiro</h3>
+        <div class="stats-info" id="menu-stats"></div>
+        <div class="menu-buttons">
+            <button id="upgrade-btn">⬆️ UPGRADE (💰<span id="upgrade-cost">50</span>)</button>
+            <button id="sell-btn">💸 <span data-i18n="sell">VENDER</span> (+<span id="sell-price">50</span>💰)</button>
+            <button id="close-menu-btn">✖️ <span data-i18n="close">Fechar</span></button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const upgradeMenu = document.getElementById('upgrade-menu');
+
+        // Sistema de Tradução
+        const translations = {
+            pt: {
+                // UI
+                health: "Vida",
+                gold: "Ouro",
+                kills: "Mortes",
+                combo: "Combo",
+                stage: "Fase",
+                wave: "Onda",
+                power: "PODER",
+                startWave: "Iniciar Onda",
+                heroes: "HERÓIS",
+                sell: "VENDER",
+                close: "Fechar",
+                autoOn: "Auto: ON",
+                autoOff: "Auto: OFF",
+                
+                // Categorias
+                shooters: "Atiradores",
+                magic: "Magia",
+                legendary: "Lendários",
+                support: "Suporte",
+                
+                // Heróis
+                warrior: "Guerreiro",
+                archer: "Arqueiro",
+                assassin: "Assassino",
+                sniper: "Atirador",
+                cannon: "Canhão",
+                bomber: "Bombardeiro",
+                paladin: "Paladino",
+                mage: "Mago",
 @@ -865,50 +870,57 @@
-                 lightningDesc: "Atinge múltiplos inimigos",
-                 farmDesc: "Gera 10💰 a cada 12s",
-                 
-                 // Stats
-                 damage: "Dano",
-                 range: "Alcance",
-                 speed: "Vel",
-                 income: "Renda",
-                 interval: "Intervalo",
-                 level: "Nível",
-                 invested: "Investido",
-                 next: "Próximo",
-                 
-                 // Mensagens
-                 waveComplete: "ONDA {0} COMPLETA!",
-                 bonus: "BÔNUS!",
-                 nextWaveIn: "Próxima onda em 2s...",
-                 infiniteMode: "MODO INFINITO!",
-                 cannotPlace: "Não pode!",
-                 tooClose: "Muito perto!",
-                 meteor: "METEORO!",
-                 hit: "ATINGIDOS!",
-                 bossWarning: "⚠️ CHEFÃO APARECENDO! ⚠️",
-                 paused: "PAUSADA",
-                 crit: "CRIT!",
-+                comboBonus: "BÔNUS DE COMBO",
-+                mutator: "Mutador",
-+                mutatorNone: "Padrão",
-+                mutatorFrenzy: "Frenesi",
-+                mutatorTank: "Fortificados",
-+                mutatorRegen: "Regeneração",
-+                mutatorGolden: "Tesouro",
-                 
-                 // Game Over
-                 gameOver: "💀 GAME OVER 💀",
-                 victory: "🏆 VITÓRIA! 🏆",
-                 totalWaves: "Total de Ondas",
-                 heroesCount: "Heróis",
-                 farmsCount: "Fazendas",
-                 tryAgain: "Tentar Fase {0} Novamente",
-                 initialGold: "Ouro inicial",
-                 goldMultiplier: "Multiplicador de ouro",
-                 noHeroes: "Sem heróis",
-                 retryStage: "🔄 Tentar Fase {0} Novamente",
-                 backToStage1: "🏠 Voltar para Fase 1",
-                 playAgain: "🔄 Jogar Novamente",
-                 
-                 // Stage Complete
-                 stageComplete: "🏆 FASE {0} COMPLETA! 🏆",
-                 difficulty: "Dificuldade",
-                 stageBonus: "Bônus de Fase",
-                 totalGold: "Ouro Total",
-                 totalKills: "Total de Mortes",
-                 currentGold: "Ouro atual",
-                 nextStage: "Próxima fase",
-                 nextStageInfo: "📍 FASE {0}",
-                 enemiesStronger: "Inimigos +{0}% mais fortes",
+                lightningDesc: "Atinge múltiplos inimigos",
+                farmDesc: "Gera 100💰 a cada 8s",
+                
+                // Stats
+                damage: "Dano",
+                range: "Alcance",
+                speed: "Vel",
+                income: "Renda",
+                interval: "Intervalo",
+                level: "Nível",
+                invested: "Investido",
+                next: "Próximo",
+                
+                // Mensagens
+                waveComplete: "ONDA {0} COMPLETA!",
+                bonus: "BÔNUS!",
+                nextWaveIn: "Próxima onda em 2s...",
+                infiniteMode: "MODO INFINITO!",
+                cannotPlace: "Não pode!",
+                tooClose: "Muito perto!",
+                meteor: "METEORO!",
+                hit: "ATINGIDOS!",
+                bossWarning: "⚠️ CHEFÃO APARECENDO! ⚠️",
+                paused: "PAUSADA",
+                crit: "CRIT!",
+                comboBonus: "BÔNUS DE COMBO",
+                mutator: "Mutador",
+                mutatorNone: "Padrão",
+                mutatorFrenzy: "Frenesi",
+                mutatorTank: "Fortificados",
+                mutatorRegen: "Regeneração",
+                mutatorGolden: "Tesouro",
+                
+                // Game Over
+                gameOver: "💀 GAME OVER 💀",
+                victory: "🏆 VITÓRIA! 🏆",
+                totalWaves: "Total de Ondas",
+                heroesCount: "Heróis",
+                farmsCount: "Fazendas",
+                tryAgain: "Tentar Fase {0} Novamente",
+                initialGold: "Ouro inicial",
+                goldMultiplier: "Multiplicador de ouro",
+                noHeroes: "Sem heróis",
+                retryStage: "🔄 Tentar Fase {0} Novamente",
+                backToStage1: "🏠 Voltar para Fase 1",
+                playAgain: "🔄 Jogar Novamente",
+                
+                // Stage Complete
+                stageComplete: "🏆 FASE {0} COMPLETA! 🏆",
+                difficulty: "Dificuldade",
+                stageBonus: "Bônus de Fase",
+                totalGold: "Ouro Total",
+                totalKills: "Total de Mortes",
+                currentGold: "Ouro atual",
+                nextStage: "Próxima fase",
+                nextStageInfo: "📍 FASE {0}",
+                enemiesStronger: "Inimigos +{0}% mais fortes",
 @@ -928,50 +940,51 @@
-                 impossible: "Impossível",
-                 
-                 // Instruções
-                 instructions: `<strong>📖 COMO JOGAR:</strong><br>
-                     1️⃣ Clique na categoria<br>
-                     2️⃣ Passe o mouse para ver stats<br>
-                     3️⃣ Clique no herói → posicione<br>
-                     4️⃣ Clique no colocado = menu<br><br>
-                     <strong style="color:#e74c3c;">⚡ PODER: Dano em área (30s)</strong>`,
-                 
-                 // Estruturas
-                 evilLair: "☠️ COVIL SOMBRIO",
-                 cursedMountain: "💀 MONTANHA MALDITA",
-                 infernoPortal: "🔥 PORTAL INFERNAL",
-                 yourCastle: "🛡️ SEU CASTELO",
-                 
-                 // Achievements
-                 kills100: "💀 100 MORTES!",
-                 kills500: "⚔️ 500 MORTES!"
-             },
-             es: {
-                 // UI
-                 health: "Vida",
-                 gold: "Oro",
-                 kills: "Muertes",
-+                combo: "Combo",
-                 stage: "Etapa",
-                 wave: "Oleada",
-                 power: "PODER",
-                 startWave: "Iniciar Oleada",
-                 heroes: "HÉROES",
-                 sell: "VENDER",
-                 close: "Cerrar",
-                 autoOn: "Auto: ON",
-                 autoOff: "Auto: OFF",
-                 
-                 // Categorias
-                 shooters: "Tiradores",
-                 magic: "Magia",
-                 legendary: "Legendarios",
-                 support: "Soporte",
-                 
-                 // Heróis
-                 warrior: "Guerrero",
-                 archer: "Arquero",
-                 assassin: "Asesino",
-                 sniper: "Francotirador",
-                 cannon: "Cañón",
-                 bomber: "Bombardero",
-                 paladin: "Paladín",
-                 mage: "Mago",
+                impossible: "Impossível",
+                
+                // Instruções
+                instructions: `<strong>📖 COMO JOGAR:</strong><br>
+                    1️⃣ Clique na categoria<br>
+                    2️⃣ Passe o mouse para ver stats<br>
+                    3️⃣ Clique no herói → posicione<br>
+                    4️⃣ Clique no colocado = menu<br><br>
+                    <strong style="color:#e74c3c;">⚡ PODER: Dano em área (30s)</strong>`,
+                
+                // Estruturas
+                evilLair: "☠️ COVIL SOMBRIO",
+                cursedMountain: "💀 MONTANHA MALDITA",
+                infernoPortal: "🔥 PORTAL INFERNAL",
+                yourCastle: "🛡️ SEU CASTELO",
+                
+                // Achievements
+                kills100: "💀 100 MORTES!",
+                kills500: "⚔️ 500 MORTES!"
+            },
+            es: {
+                // UI
+                health: "Vida",
+                gold: "Oro",
+                kills: "Muertes",
+                combo: "Combo",
+                stage: "Etapa",
+                wave: "Oleada",
+                power: "PODER",
+                startWave: "Iniciar Oleada",
+                heroes: "HÉROES",
+                sell: "VENDER",
+                close: "Cerrar",
+                autoOn: "Auto: ON",
+                autoOff: "Auto: OFF",
+                
+                // Categorias
+                shooters: "Tiradores",
+                magic: "Magia",
+                legendary: "Legendarios",
+                support: "Soporte",
+                
+                // Heróis
+                warrior: "Guerrero",
+                archer: "Arquero",
+                assassin: "Asesino",
+                sniper: "Francotirador",
+                cannon: "Cañón",
+                bomber: "Bombardero",
+                paladin: "Paladín",
+                mage: "Mago",
 @@ -1002,50 +1015,57 @@
-                 lightningDesc: "Alcanza múltiples enemigos",
-                 farmDesc: "Genera 10💰 cada 12s",
-                 
-                 // Stats
-                 damage: "Daño",
-                 range: "Alcance",
-                 speed: "Vel",
-                 income: "Ingreso",
-                 interval: "Intervalo",
-                 level: "Nivel",
-                 invested: "Invertido",
-                 next: "Siguiente",
-                 
-                 // Mensagens
-                 waveComplete: "¡OLEADA {0} COMPLETADA!",
-                 bonus: "¡BONUS!",
-                 nextWaveIn: "Próxima oleada en 2s...",
-                 infiniteMode: "¡MODO INFINITO!",
-                 cannotPlace: "¡No puedes!",
-                 tooClose: "¡Muy cerca!",
-                 meteor: "¡METEORO!",
-                 hit: "¡ALCANZADOS!",
-                 bossWarning: "⚠️ ¡JEFE APARECIENDO! ⚠️",
-                 paused: "PAUSADA",
-                 crit: "¡CRIT!",
-+                comboBonus: "BONO DE COMBO",
-+                mutator: "Mutador",
-+                mutatorNone: "Estándar",
-+                mutatorFrenzy: "Frenesí",
-+                mutatorTank: "Fortificados",
-+                mutatorRegen: "Regeneración",
-+                mutatorGolden: "Tesoro",
-                 
-                 // Game Over
-                 gameOver: "💀 FIN DEL JUEGO 💀",
-                 victory: "🏆 ¡VICTORIA! 🏆",
-                 totalWaves: "Total de Oleadas",
-                 heroesCount: "Héroes",
-                 farmsCount: "Granjas",
-                 tryAgain: "Intentar Etapa {0} Nuevamente",
-                 initialGold: "Oro inicial",
-                 goldMultiplier: "Multiplicador de oro",
-                 noHeroes: "Sin héroes",
-                 retryStage: "🔄 Intentar Etapa {0} Nuevamente",
-                 backToStage1: "🏠 Volver a Etapa 1",
-                 playAgain: "🔄 Jugar Nuevamente",
-                 
-                 // Stage Complete
-                 stageComplete: "🏆 ¡ETAPA {0} COMPLETADA! 🏆",
-                 difficulty: "Dificultad",
-                 stageBonus: "Bonus de Etapa",
-                 totalGold: "Oro Total",
-                 totalKills: "Total de Muertes",
-                 currentGold: "Oro actual",
-                 nextStage: "Próxima etapa",
-                 nextStageInfo: "📍 ETAPA {0}",
-                 enemiesStronger: "Enemigos +{0}% más fuertes",
+                lightningDesc: "Alcanza múltiples enemigos",
+                farmDesc: "Genera 10💰 cada 12s",
+                
+                // Stats
+                damage: "Daño",
+                range: "Alcance",
+                speed: "Vel",
+                income: "Ingreso",
+                interval: "Intervalo",
+                level: "Nivel",
+                invested: "Invertido",
+                next: "Siguiente",
+                
+                // Mensagens
+                waveComplete: "¡OLEADA {0} COMPLETADA!",
+                bonus: "¡BONUS!",
+                nextWaveIn: "Próxima oleada en 2s...",
+                infiniteMode: "¡MODO INFINITO!",
+                cannotPlace: "¡No puedes!",
+                tooClose: "¡Muy cerca!",
+                meteor: "¡METEORO!",
+                hit: "¡ALCANZADOS!",
+                bossWarning: "⚠️ ¡JEFE APARECIENDO! ⚠️",
+                paused: "PAUSADA",
+                crit: "¡CRIT!",
+                comboBonus: "BONO DE COMBO",
+                mutator: "Mutador",
+                mutatorNone: "Estándar",
+                mutatorFrenzy: "Frenesí",
+                mutatorTank: "Fortificados",
+                mutatorRegen: "Regeneración",
+                mutatorGolden: "Tesoro",
+                
+                // Game Over
+                gameOver: "💀 FIN DEL JUEGO 💀",
+                victory: "🏆 ¡VICTORIA! 🏆",
+                totalWaves: "Total de Oleadas",
+                heroesCount: "Héroes",
+                farmsCount: "Granjas",
+                tryAgain: "Intentar Etapa {0} Nuevamente",
+                initialGold: "Oro inicial",
+                goldMultiplier: "Multiplicador de oro",
+                noHeroes: "Sin héroes",
+                retryStage: "🔄 Intentar Etapa {0} Nuevamente",
+                backToStage1: "🏠 Volver a Etapa 1",
+                playAgain: "🔄 Jugar Nuevamente",
+                
+                // Stage Complete
+                stageComplete: "🏆 ¡ETAPA {0} COMPLETADA! 🏆",
+                difficulty: "Dificultad",
+                stageBonus: "Bonus de Etapa",
+                totalGold: "Oro Total",
+                totalKills: "Total de Muertes",
+                currentGold: "Oro actual",
+                nextStage: "Próxima etapa",
+                nextStageInfo: "📍 ETAPA {0}",
+                enemiesStronger: "Enemigos +{0}% más fuertes",
 @@ -1065,50 +1085,51 @@
-                 impossible: "Imposible",
-                 
-                 // Instruções
-                 instructions: `<strong>📖 CÓMO JUGAR:</strong><br>
-                     1️⃣ Haz clic en la categoría<br>
-                     2️⃣ Pasa el mouse para ver stats<br>
-                     3️⃣ Clic en héroe → posiciona<br>
-                     4️⃣ Clic en colocado = menú<br><br>
-                     <strong style="color:#e74c3c;">⚡ PODER: Daño en área (30s)</strong>`,
-                 
-                 // Estruturas
-                 evilLair: "☠️ GUARIDA MALVADA",
-                 cursedMountain: "💀 MONTAÑA MALDITA",
-                 infernoPortal: "🔥 PORTAL INFERNAL",
-                 yourCastle: "🛡️ TU CASTILLO",
-                 
-                 // Achievements
-                 kills100: "💀 ¡100 MUERTES!",
-                 kills500: "⚔️ ¡500 MUERTES!"
-             },
-             en: {
-                 // UI
-                 health: "Health",
-                 gold: "Gold",
-                 kills: "Kills",
-+                combo: "Combo",
-                 stage: "Stage",
-                 wave: "Wave",
-                 power: "POWER",
-                 startWave: "Start Wave",
-                 heroes: "HEROES",
-                 sell: "SELL",
-                 close: "Close",
-                 autoOn: "Auto: ON",
-                 autoOff: "Auto: OFF",
-                 
-                 // Categorias
-                 shooters: "Shooters",
-                 magic: "Magic",
-                 legendary: "Legendary",
-                 support: "Support",
-                 
-                 // Heróis
-                 warrior: "Warrior",
-                 archer: "Archer",
-                 assassin: "Assassin",
-                 sniper: "Sniper",
-                 cannon: "Cannon",
-                 bomber: "Bomber",
-                 paladin: "Paladin",
-                 mage: "Mage",
+                impossible: "Imposible",
+                
+                // Instruções
+                instructions: `<strong>📖 CÓMO JUGAR:</strong><br>
+                    1️⃣ Haz clic en la categoría<br>
+                    2️⃣ Pasa el mouse para ver stats<br>
+                    3️⃣ Clic en héroe → posiciona<br>
+                    4️⃣ Clic en colocado = menú<br><br>
+                    <strong style="color:#e74c3c;">⚡ PODER: Daño en área (30s)</strong>`,
+                
+                // Estruturas
+                evilLair: "☠️ GUARIDA MALVADA",
+                cursedMountain: "💀 MONTAÑA MALDITA",
+                infernoPortal: "🔥 PORTAL INFERNAL",
+                yourCastle: "🛡️ TU CASTILLO",
+                
+                // Achievements
+                kills100: "💀 ¡100 MUERTES!",
+                kills500: "⚔️ ¡500 MUERTES!"
+            },
+            en: {
+                // UI
+                health: "Health",
+                gold: "Gold",
+                kills: "Kills",
+                combo: "Combo",
+                stage: "Stage",
+                wave: "Wave",
+                power: "POWER",
+                startWave: "Start Wave",
+                heroes: "HEROES",
+                sell: "SELL",
+                close: "Close",
+                autoOn: "Auto: ON",
+                autoOff: "Auto: OFF",
+                
+                // Categorias
+                shooters: "Shooters",
+                magic: "Magic",
+                legendary: "Legendary",
+                support: "Support",
+                
+                // Heróis
+                warrior: "Warrior",
+                archer: "Archer",
+                assassin: "Assassin",
+                sniper: "Sniper",
+                cannon: "Cannon",
+                bomber: "Bomber",
+                paladin: "Paladin",
+                mage: "Mage",
 @@ -1139,50 +1160,57 @@
-                 lightningDesc: "Hits multiple enemies",
-                 farmDesc: "Generates 10💰 every 12s",
-                 
-                 // Stats
-                 damage: "Damage",
-                 range: "Range",
-                 speed: "Speed",
-                 income: "Income",
-                 interval: "Interval",
-                 level: "Level",
-                 invested: "Invested",
-                 next: "Next",
-                 
-                 // Mensagens
-                 waveComplete: "WAVE {0} COMPLETE!",
-                 bonus: "BONUS!",
-                 nextWaveIn: "Next wave in 2s...",
-                 infiniteMode: "INFINITE MODE!",
-                 cannotPlace: "Can't place!",
-                 tooClose: "Too close!",
-                 meteor: "METEOR!",
-                 hit: "HIT!",
-                 bossWarning: "⚠️ BOSS INCOMING! ⚠️",
-                 paused: "PAUSED",
-                 crit: "CRIT!",
-+                comboBonus: "COMBO BONUS",
-+                mutator: "Mutator",
-+                mutatorNone: "Standard",
-+                mutatorFrenzy: "Frenzy",
-+                mutatorTank: "Fortified",
-+                mutatorRegen: "Regeneration",
-+                mutatorGolden: "Treasure",
-                 
-                 // Game Over
-                 gameOver: "💀 GAME OVER 💀",
-                 victory: "🏆 VICTORY! 🏆",
-                 totalWaves: "Total Waves",
-                 heroesCount: "Heroes",
-                 farmsCount: "Farms",
-                 tryAgain: "Try Stage {0} Again",
-                 initialGold: "Initial gold",
-                 goldMultiplier: "Gold multiplier",
-                 noHeroes: "No heroes",
-                 retryStage: "🔄 Try Stage {0} Again",
-                 backToStage1: "🏠 Back to Stage 1",
-                 playAgain: "🔄 Play Again",
-                 
-                 // Stage Complete
-                 stageComplete: "🏆 STAGE {0} COMPLETE! 🏆",
-                 difficulty: "Difficulty",
-                 stageBonus: "Stage Bonus",
-                 totalGold: "Total Gold",
-                 totalKills: "Total Kills",
-                 currentGold: "Current gold",
-                 nextStage: "Next stage",
-                 nextStageInfo: "📍 STAGE {0}",
-                 enemiesStronger: "Enemies +{0}% stronger",
+                lightningDesc: "Hits multiple enemies",
+                farmDesc: "Generates 10💰 every 12s",
+                
+                // Stats
+                damage: "Damage",
+                range: "Range",
+                speed: "Speed",
+                income: "Income",
+                interval: "Interval",
+                level: "Level",
+                invested: "Invested",
+                next: "Next",
+                
+                // Mensagens
+                waveComplete: "WAVE {0} COMPLETE!",
+                bonus: "BONUS!",
+                nextWaveIn: "Next wave in 2s...",
+                infiniteMode: "INFINITE MODE!",
+                cannotPlace: "Can't place!",
+                tooClose: "Too close!",
+                meteor: "METEOR!",
+                hit: "HIT!",
+                bossWarning: "⚠️ BOSS INCOMING! ⚠️",
+                paused: "PAUSED",
+                crit: "CRIT!",
+                comboBonus: "COMBO BONUS",
+                mutator: "Mutator",
+                mutatorNone: "Standard",
+                mutatorFrenzy: "Frenzy",
+                mutatorTank: "Fortified",
+                mutatorRegen: "Regeneration",
+                mutatorGolden: "Treasure",
+                
+                // Game Over
+                gameOver: "💀 GAME OVER 💀",
+                victory: "🏆 VICTORY! 🏆",
+                totalWaves: "Total Waves",
+                heroesCount: "Heroes",
+                farmsCount: "Farms",
+                tryAgain: "Try Stage {0} Again",
+                initialGold: "Initial gold",
+                goldMultiplier: "Gold multiplier",
+                noHeroes: "No heroes",
+                retryStage: "🔄 Try Stage {0} Again",
+                backToStage1: "🏠 Back to Stage 1",
+                playAgain: "🔄 Play Again",
+                
+                // Stage Complete
+                stageComplete: "🏆 STAGE {0} COMPLETE! 🏆",
+                difficulty: "Difficulty",
+                stageBonus: "Stage Bonus",
+                totalGold: "Total Gold",
+                totalKills: "Total Kills",
+                currentGold: "Current gold",
+                nextStage: "Next stage",
+                nextStageInfo: "📍 STAGE {0}",
+                enemiesStronger: "Enemies +{0}% stronger",
 @@ -1286,51 +1314,63 @@
-             gold: 1000,
-             wave: 0,
-             maxWaves: 25,
-             stage: 1,
-             gameSpeed: 1,
-             enemies: [],
-             heroes: [],
-             projectiles: [],
-             effects: [],
-             selectedHeroType: null,
-             selectedHeroForUpgrade: null,
-             waveActive: false,
-             autoWave: false,
-             gameOver: false,
-             stagePaused: false,
-             path: [],
-             enemiesSpawned: 0,
-             totalEnemiesToSpawn: 0,
-             menuPosition: { x: 0, y: 0 },
-             kills: 0,
-             abilityCooldown: 0,
-             abilityReady: true,
-             lastAbilityUse: 0,
-             criticalChance: 0.10,
-             bossWarningActive: false,
--            achievements: []
-+            achievements: [],
-+            combo: 1,
-+            maxCombo: 1,
-+            comboTimeout: 0,
-+            waveMutator: null
-+        };
-+
-+        const waveMutators = {
-+            none: { key: "mutatorNone", healthMult: 1, speedMult: 1, goldMult: 1, armorBonus: 0, regenRate: 0, aura: null },
-+            frenzy: { key: "mutatorFrenzy", healthMult: 0.9, speedMult: 1.35, goldMult: 1.2, armorBonus: 0, regenRate: 0, aura: "#e74c3c" },
-+            tank: { key: "mutatorTank", healthMult: 1.45, speedMult: 0.82, goldMult: 1.3, armorBonus: 0.08, regenRate: 0, aura: "#95a5a6" },
-+            regen: { key: "mutatorRegen", healthMult: 1.2, speedMult: 1, goldMult: 1.25, armorBonus: 0, regenRate: 0.004, aura: "#2ecc71" },
-+            golden: { key: "mutatorGolden", healthMult: 1.1, speedMult: 1.1, goldMult: 1.65, armorBonus: 0, regenRate: 0, aura: "#f1c40f" }
-         };
- 
-         const heroCategories = {
-             shooters: {
-                 icon: '🏹',
-                 heroes: ['warrior', 'archer', 'assassin', 'sniper', 'cannon', 'bomber', 'paladin']
-             },
-             magic: {
-                 icon: '🔮',
-                 heroes: ['mage', 'cleric', 'frost', 'necro']
-             },
-             legendary: {
-                 icon: '⭐',
-                 heroes: ['templar', 'ninja', 'druid', 'lightning']
-             },
-             support: {
-                 icon: '🌾',
-                 heroes: ['farm']
-             }
-         };
- 
-         const heroTypes = {
-             warrior: { image: '🗡️', cost: 100, damage: 55, range: 100, attackSpeed: 500, color: '#e74c3c', type: 'combat', category: 'shooters' },
-             archer: { image: '🏹', cost: 150, damage: 25, range: 200, attackSpeed: 800, color: '#27ae60', type: 'combat', category: 'shooters' },
-             assassin: { image: '🗡️', cost: 180, damage: 80, range: 80, attackSpeed: 350, color: '#8e44ad', type: 'combat', category: 'shooters' },
+            gold: 1000,
+            wave: 0,
+            maxWaves: 25,
+            stage: 1,
+            gameSpeed: 1,
+            enemies: [],
+            heroes: [],
+            projectiles: [],
+            effects: [],
+            selectedHeroType: null,
+            selectedHeroForUpgrade: null,
+            waveActive: false,
+            autoWave: false,
+            gameOver: false,
+            stagePaused: false,
+            path: [],
+            enemiesSpawned: 0,
+            totalEnemiesToSpawn: 0,
+            menuPosition: { x: 0, y: 0 },
+            kills: 0,
+            abilityCooldown: 0,
+            abilityReady: true,
+            lastAbilityUse: 0,
+            criticalChance: 0.10,
+            bossWarningActive: false,
+            achievements: []
+            achievements: [],
+            combo: 1,
+            maxCombo: 1,
+            comboTimeout: 0,
+            waveMutator: null
+        };
+
+        const waveMutators = {
+            none: { key: "mutatorNone", healthMult: 1, speedMult: 1, goldMult: 1, armorBonus: 0, regenRate: 0, aura: null },
+            frenzy: { key: "mutatorFrenzy", healthMult: 0.9, speedMult: 1.35, goldMult: 1.2, armorBonus: 0, regenRate: 0, aura: "#e74c3c" },
+            tank: { key: "mutatorTank", healthMult: 1.45, speedMult: 0.82, goldMult: 1.3, armorBonus: 0.08, regenRate: 0, aura: "#95a5a6" },
+            regen: { key: "mutatorRegen", healthMult: 1.2, speedMult: 1, goldMult: 1.25, armorBonus: 0, regenRate: 0.004, aura: "#2ecc71" },
+            golden: { key: "mutatorGolden", healthMult: 1.1, speedMult: 1.1, goldMult: 1.65, armorBonus: 0, regenRate: 0, aura: "#f1c40f" }
+        };
+
+        const heroCategories = {
+            shooters: {
+                icon: '🏹',
+                heroes: ['warrior', 'archer', 'assassin', 'sniper', 'cannon', 'bomber', 'paladin']
+            },
+            magic: {
+                icon: '🔮',
+                heroes: ['mage', 'cleric', 'frost', 'necro']
+            },
+            legendary: {
+                icon: '⭐',
+                heroes: ['templar', 'ninja', 'druid', 'lightning']
+            },
+            support: {
+                icon: '🌾',
+                heroes: ['farm']
+            }
+        };
+
+        const heroTypes = {
+            warrior: { image: '🗡️', cost: 100, damage: 55, range: 100, attackSpeed: 500, color: '#e74c3c', type: 'combat', category: 'shooters' },
+            archer: { image: '🏹', cost: 150, damage: 25, range: 200, attackSpeed: 800, color: '#27ae60', type: 'combat', category: 'shooters' },
+            assassin: { image: '🗡️', cost: 180, damage: 80, range: 80, attackSpeed: 350, color: '#8e44ad', type: 'combat', category: 'shooters' },
 @@ -1352,50 +1392,98 @@
-         const enemyTypes = {
-             goblin: { name: 'Goblin', emoji: '👺', health: 50, speed: 1.8, damage: 5, gold: 3 },
-             orc: { name: 'Orc', emoji: '👹', health: 100, speed: 1.4, damage: 10, gold: 5 },
-             troll: { name: 'Troll', emoji: '🧟', health: 200, speed: 1.0, damage: 15, gold: 7 },
-             ogre: { name: 'Ogre', emoji: '👾', health: 350, speed: 0.8, damage: 25, gold: 10 },
-             dragon: { name: 'Dragão', emoji: '🐉', health: 500, speed: 1.2, damage: 40, gold: 25 },
-             demon: { name: 'Demônio', emoji: '👿', health: 800, speed: 1.5, damage: 50, gold: 40 },
-             boss: { name: 'Chefão', emoji: '💀', health: 2000, speed: 0.6, damage: 100, gold: 100 }
-         };
- 
-         const stageDifficulty = {
-             1: { key: 'normal', class: 'diff-normal' },
-             2: { key: 'hard', class: 'diff-hard' },
-             3: { key: 'nightmare', class: 'diff-nightmare' },
-             4: { key: 'hell', class: 'diff-hell' },
-             5: { key: 'impossible', class: 'diff-inferno' }
-         };
- 
-         function calculateDamage(baseDamage) {
-             if (Math.random() < game.criticalChance) {
-                 return { damage: baseDamage * 1.25, isCritical: true };
-             }
-             return { damage: baseDamage, isCritical: false };
-         }
- 
-+        function resetCombo() {
-+            game.combo = 1;
-+            game.maxCombo = 1;
-+            game.comboTimeout = 0;
-+        }
-+
-+        function registerKill() {
-+            const now = Date.now();
-+            if (now < game.comboTimeout) game.combo = Math.min(20, game.combo + 1);
-+            else game.combo = 1;
-+            game.comboTimeout = now + 3000;
-+            game.maxCombo = Math.max(game.maxCombo, game.combo);
-+        }
-+
-+        function getComboDamageMultiplier() {
-+            return 1 + Math.min(0.4, (game.combo - 1) * 0.02);
-+        }
-+
-+        function handleEnemyDefeat(enemy) {
-+            enemy.dead = true;
-+            registerKill();
-+            game.gold += enemy.gold;
-+            game.kills++;
-+
-+            if (game.kills === 100 && !game.achievements.includes('kills100')) {
-+                showAchievement('kills100', '+200 ' + t('gold'));
-+                game.gold += 200;
-+                game.achievements.push('kills100');
-+            }
-+            if (game.kills === 500 && !game.achievements.includes('kills500')) {
-+                showAchievement('kills500', '+1000 ' + t('gold'));
-+                game.gold += 1000;
-+                game.achievements.push('kills500');
-+            }
-+
-+            const comboText = game.combo > 1 ? ` x${game.combo}` : '';
-+            game.effects.push({ x: enemy.x, y: enemy.y, text: `+${enemy.gold}💰${comboText}`, color: '#f1c40f', life: 35 });
-+            updateUI();
-+        }
-+
-+        function chooseWaveMutator() {
-+            const mutatorPool = ['none', 'frenzy', 'tank', 'regen', 'golden'];
-+            const waveScale = Math.min(0.85, game.wave / 35);
-+            const guaranteed = game.wave > 4 && Math.random() < waveScale;
-+            const pick = guaranteed ? mutatorPool[1 + Math.floor(Math.random() * (mutatorPool.length - 1))] : 'none';
-+            game.waveMutator = waveMutators[pick];
-+        }
-+
-         function useAbility() {
-             if (!game.abilityReady || game.abilityCooldown > 0) return;
-             
-             game.abilityReady = false;
-             game.lastAbilityUse = Date.now();
-             game.abilityCooldown = 30;
-             
-             const meteorX = canvas.width / 2;
-             const meteorY = canvas.height / 2;
-             
-             let hitCount = 0;
-             for (const enemy of game.enemies) {
-                 if (enemy.dead) continue;
-                 const dist = Math.sqrt((enemy.x - meteorX) ** 2 + (enemy.y - meteorY) ** 2);
-                 if (dist < 200) {
-                     const damage = 200 * (1 - dist / 200);
-                     enemy.takeDamage(damage);
-                     hitCount++;
-                 }
-             }
-             
-             game.effects.push({ x: meteorX, y: meteorY, text: '☄️ ' + t('meteor'), color: '#e74c3c', life: 60 });
-             
-             if (hitCount > 0) {
-                 game.effects.push({ x: meteorX, y: meteorY + 30, text: `💥 ${hitCount} ${t('hit')}`, color: '#f39c12', life: 50 });
+        const enemyTypes = {
+            goblin: { name: 'Goblin', emoji: '👺', health: 50, speed: 1.8, damage: 5, gold: 3 },
+            orc: { name: 'Orc', emoji: '👹', health: 100, speed: 1.4, damage: 10, gold: 5 },
+            troll: { name: 'Troll', emoji: '🧟', health: 200, speed: 1.0, damage: 15, gold: 7 },
+            ogre: { name: 'Ogre', emoji: '👾', health: 350, speed: 0.8, damage: 25, gold: 10 },
+            dragon: { name: 'Dragão', emoji: '🐉', health: 500, speed: 1.2, damage: 40, gold: 25 },
+            demon: { name: 'Demônio', emoji: '👿', health: 800, speed: 1.5, damage: 50, gold: 40 },
+            boss: { name: 'Chefão', emoji: '💀', health: 2000, speed: 0.6, damage: 100, gold: 100 }
+        };
+
+        const stageDifficulty = {
+            1: { key: 'normal', class: 'diff-normal' },
+            2: { key: 'hard', class: 'diff-hard' },
+            3: { key: 'nightmare', class: 'diff-nightmare' },
+            4: { key: 'hell', class: 'diff-hell' },
+            5: { key: 'impossible', class: 'diff-inferno' }
+        };
+
+        function calculateDamage(baseDamage) {
+            if (Math.random() < game.criticalChance) {
+                return { damage: baseDamage * 1.25, isCritical: true };
+            }
+            return { damage: baseDamage, isCritical: false };
+        }
+
+        function resetCombo() {
+            game.combo = 1;
+            game.maxCombo = 1;
+            game.comboTimeout = 0;
+        }
+
+        function registerKill() {
+            const now = Date.now();
+            if (now < game.comboTimeout) game.combo = Math.min(20, game.combo + 1);
+            else game.combo = 1;
+            game.comboTimeout = now + 3000;
+            game.maxCombo = Math.max(game.maxCombo, game.combo);
+        }
+
+        function getComboDamageMultiplier() {
+            return 1 + Math.min(0.4, (game.combo - 1) * 0.02);
+        }
+
+        function handleEnemyDefeat(enemy) {
+            enemy.dead = true;
+            registerKill();
+            game.gold += enemy.gold;
+            game.kills++;
+
+            if (game.kills === 100 && !game.achievements.includes('kills100')) {
+                showAchievement('kills100', '+200 ' + t('gold'));
+                game.gold += 200;
+                game.achievements.push('kills100');
+            }
+            if (game.kills === 500 && !game.achievements.includes('kills500')) {
+                showAchievement('kills500', '+1000 ' + t('gold'));
+                game.gold += 1000;
+                game.achievements.push('kills500');
+            }
+
+            const comboText = game.combo > 1 ? ` x${game.combo}` : '';
+            game.effects.push({ x: enemy.x, y: enemy.y, text: `+${enemy.gold}💰${comboText}`, color: '#f1c40f', life: 35 });
+            updateUI();
+        }
+
+        function chooseWaveMutator() {
+            const mutatorPool = ['none', 'frenzy', 'tank', 'regen', 'golden'];
+            const waveScale = Math.min(0.85, game.wave / 35);
+            const guaranteed = game.wave > 4 && Math.random() < waveScale;
+            const pick = guaranteed ? mutatorPool[1 + Math.floor(Math.random() * (mutatorPool.length - 1))] : 'none';
+            game.waveMutator = waveMutators[pick];
+        }
+
+        function useAbility() {
+            if (!game.abilityReady || game.abilityCooldown > 0) return;
+            
+            game.abilityReady = false;
+            game.lastAbilityUse = Date.now();
+            game.abilityCooldown = 30;
+            
+            const meteorX = canvas.width / 2;
+            const meteorY = canvas.height / 2;
+            
+            let hitCount = 0;
+            for (const enemy of game.enemies) {
+                if (enemy.dead) continue;
+                const dist = Math.sqrt((enemy.x - meteorX) ** 2 + (enemy.y - meteorY) ** 2);
+                if (dist < 200) {
+                    const damage = 200 * (1 - dist / 200);
+                    enemy.takeDamage(damage);
+                    hitCount++;
+                }
+            }
+            
+            game.effects.push({ x: meteorX, y: meteorY, text: '☄️ ' + t('meteor'), color: '#e74c3c', life: 60 });
+            
+            if (hitCount > 0) {
+                game.effects.push({ x: meteorX, y: meteorY + 30, text: `💥 ${hitCount} ${t('hit')}`, color: '#f39c12', life: 50 });
 @@ -1487,203 +1575,204 @@
-                 for (let i = 1; i < segments; i++) {
-                     const progress = i / segments;
-                     const x = startX + (endX - startX) * progress;
-                     const yOffset = (i % 2 === 0 ? 1 : -1) * amplitude * (0.7 + Math.random() * 0.3);
-                     path.push({ x, y: centerY + yOffset });
-                 }
-                 path.push({ x: endX, y: centerY });
-             }
-             
-             game.path = path;
-         }
- 
-         function getDifficultyMultiplier() { return 1 + (game.stage - 1) * 0.4; }
-         function getSpeedMultiplier() { return 1 + (game.stage - 1) * 0.15; }
- 
-         class Enemy {
-             constructor(type) {
-                 const config = enemyTypes[type];
-                 const diffMult = getDifficultyMultiplier();
-                 const speedMult = getSpeedMultiplier();
-                 const goldMult = getGoldMultiplier(game.stage);
-                 
-                 this.type = type;
-                 this.emoji = config.emoji;
-                 this.maxHealth = Math.floor(config.health * (1 + game.wave * 0.15) * diffMult);
-+                if (game.waveMutator) this.maxHealth = Math.floor(this.maxHealth * game.waveMutator.healthMult);
-                 this.health = this.maxHealth;
-                 this.baseSpeed = config.speed * speedMult;
-+                if (game.waveMutator) this.baseSpeed *= game.waveMutator.speedMult;
-                 this.speed = this.baseSpeed;
-                 this.damage = Math.floor(config.damage * diffMult);
-                 this.gold = Math.floor(config.gold * goldMult);
-+                if (game.waveMutator) this.gold = Math.floor(this.gold * game.waveMutator.goldMult);
-                 this.pathIndex = 0;
-                 this.x = game.path[0].x;
-                 this.y = game.path[0].y;
-                 this.size = type === 'boss' ? 50 : 38;
-                 this.dead = false;
-                 this.armor = type === 'boss' ? 0.3 : (type === 'demon' ? 0.2 : 0);
-+                if (game.waveMutator) this.armor += game.waveMutator.armorBonus;
-                 this.slowed = false;
-                 this.slowTimer = 0;
-                 this.poisoned = false;
-                 this.poisonDamage = 0;
-                 this.poisonTimer = 0;
-+                this.regenRate = game.waveMutator ? game.waveMutator.regenRate : 0;
-             }
- 
-             update() {
-                 if (this.dead) return;
- 
-                 if (this.poisoned && this.poisonTimer > 0) {
-                     this.poisonTimer -= game.gameSpeed;
-                     if (Math.random() < 0.05 * game.gameSpeed) {
-                         this.health -= this.poisonDamage;
-                         game.effects.push({ x: this.x + (Math.random() - 0.5) * 15, y: this.y - 15, text: `☠️${Math.floor(this.poisonDamage)}`, color: '#6c3483', life: 20 });
--                        if (this.health <= 0) { this.dead = true; game.gold += this.gold; game.kills++; updateUI(); return; }
-+                        if (this.health <= 0) { handleEnemyDefeat(this); return; }
-                     }
-                 } else { this.poisoned = false; }
- 
-+                if (this.regenRate > 0 && this.health > 0 && this.health < this.maxHealth) {
-+                    this.health = Math.min(this.maxHealth, this.health + this.maxHealth * this.regenRate * game.gameSpeed);
-+                }
-+
-                 if (this.slowed && this.slowTimer > 0) { this.slowTimer -= game.gameSpeed; this.speed = this.baseSpeed * 0.5; }
-                 else { this.slowed = false; this.speed = this.baseSpeed; }
- 
-                 const target = game.path[this.pathIndex + 1];
-                 if (!target) { this.reachCastle(); return; }
- 
-                 const dx = target.x - this.x;
-                 const dy = target.y - this.y;
-                 const dist = Math.sqrt(dx * dx + dy * dy);
- 
-                 if (dist < 10) {
-                     this.pathIndex++;
-                     if (this.pathIndex >= game.path.length - 1) this.reachCastle();
-                 } else {
-                     const currentSpeed = this.speed * game.gameSpeed;
-                     this.x += (dx / dist) * currentSpeed;
-                     this.y += (dy / dist) * currentSpeed;
-                 }
-             }
- 
-             reachCastle() {
-                 if (this.dead) return;
-                 this.dead = true;
-                 game.health -= this.damage;
-                 updateUI();
-                 if (game.health <= 0) { game.health = 0; endGame(false); }
-             }
- 
-             draw() {
-                 if (this.dead) return;
- 
-                 ctx.fillStyle = 'rgba(0,0,0,0.4)';
-                 ctx.beginPath();
-                 ctx.ellipse(this.x, this.y + 22, 18, 10, 0, 0, Math.PI * 2);
-                 ctx.fill();
- 
-                 ctx.font = `${this.size}px Arial`;
-                 ctx.textAlign = 'center';
-                 ctx.textBaseline = 'middle';
-                 ctx.fillText(this.emoji, this.x, this.y);
- 
-                 if (this.slowed) { ctx.fillStyle = 'rgba(116, 185, 255, 0.4)'; ctx.beginPath(); ctx.arc(this.x, this.y, 25, 0, Math.PI * 2); ctx.fill(); }
-                 if (this.poisoned) { ctx.fillStyle = 'rgba(108, 52, 131, 0.4)'; ctx.beginPath(); ctx.arc(this.x, this.y, 22, 0, Math.PI * 2); ctx.fill(); }
-+                if (game.waveMutator && game.waveMutator.aura) {
-+                    ctx.strokeStyle = game.waveMutator.aura;
-+                    ctx.lineWidth = 2;
-+                    ctx.beginPath();
-+                    ctx.arc(this.x, this.y, 27, 0, Math.PI * 2);
-+                    ctx.stroke();
-+                }
- 
-                 const barWidth = 46, barHeight = 8;
-                 const healthPct = this.health / this.maxHealth;
-                 ctx.fillStyle = '#000';
-                 ctx.fillRect(this.x - barWidth/2 - 2, this.y - 30, barWidth + 4, barHeight + 4);
-                 ctx.fillStyle = healthPct > 0.6 ? '#2ecc71' : healthPct > 0.3 ? '#f39c12' : '#e74c3c';
-                 ctx.fillRect(this.x - barWidth/2, this.y - 28, barWidth * healthPct, barHeight);
-                 
-                 if (this.armor > 0) { ctx.fillStyle = '#ecf0f1'; ctx.font = 'bold 10px Arial'; ctx.fillText('🛡️', this.x + 20, this.y - 25); }
-             }
- 
-             takeDamage(dmg, heroType = null) {
-                 if (this.dead) return;
-                 
-                 const finalDamage = dmg * (1 - this.armor);
-                 this.health -= finalDamage;
-                 
-                 if (heroType === 'frost') { this.slowed = true; this.slowTimer = 120; }
-                 if (heroType === 'necro') { this.poisoned = true; this.poisonDamage = dmg * 0.3; this.poisonTimer = 180; }
-                 
-                 game.effects.push({ x: this.x + (Math.random() - 0.5) * 20, y: this.y - 20, text: `-${Math.floor(finalDamage)}`, color: '#ff6b6b', life: 25 });
-                 
-                 if (this.health <= 0) {
--                    this.dead = true;
--                    game.gold += this.gold;
--                    game.kills++;
--                    
--                    if (game.kills === 100 && !game.achievements.includes('kills100')) {
--                        showAchievement('kills100', '+200 ' + t('gold'));
--                        game.gold += 200;
--                        game.achievements.push('kills100');
--                    }
--                    if (game.kills === 500 && !game.achievements.includes('kills500')) {
--                        showAchievement('kills500', '+1000 ' + t('gold'));
--                        game.gold += 1000;
--                        game.achievements.push('kills500');
--                    }
--                    
--                    game.effects.push({ x: this.x, y: this.y, text: `+${this.gold}💰`, color: '#f1c40f', life: 35 });
--                    updateUI();
-+                    handleEnemyDefeat(this);
-                 }
-             }
-         }
- 
-         class Hero {
-             constructor(type, x, y) {
-                 const config = heroTypes[type];
-                 this.type = type;
-                 this.heroType = config.type;
-                 this.image = config.image;
-                 this.x = x;
-                 this.y = y;
-                 this.baseCost = config.cost;
-                 this.baseDamage = config.damage;
-                 this.damage = config.damage;
-                 this.baseRange = config.range;
-                 this.range = config.range;
-                 this.baseAttackSpeed = config.attackSpeed;
-                 this.attackSpeed = config.attackSpeed;
-                 this.color = config.color;
-                 this.lastAttack = 0;
-                 this.lastGoldTick = 0;
-                 this.level = 1;
-                 this.upgradeCost = Math.floor(config.cost * 0.5);
-                 this.target = null;
-                 this.totalInvested = config.cost;
-                 
-                 if (type === 'farm') { this.goldPerTick = config.goldPerTick; this.tickInterval = config.attackSpeed; }
-             }
- 
-             getSellPrice() { return Math.floor(this.totalInvested * 0.5); }
- 
-             getDamageWithBuffs() {
-                 let damage = this.damage;
-                 for (const hero of game.heroes) {
-                     if (hero.type === 'paladin' && hero !== this) {
-                         const dist = Math.sqrt((this.x - hero.x) ** 2 + (this.y - hero.y) ** 2);
-                         if (dist < 150) { damage *= 1.2; break; }
-                     }
-                 }
-+                damage *= getComboDamageMultiplier();
-                 return damage;
-             }
- 
-             update() {
-                 const now = Date.now();
-                 
-                 if (this.type === 'farm') {
-                     if (!game.waveActive) { this.lastGoldTick = now; return; }
-                     if (this.lastGoldTick === 0) this.lastGoldTick = now;
-                     const adjustedInterval = this.tickInterval / game.gameSpeed;
-                     if (now - this.lastGoldTick >= adjustedInterval) {
-                         game.gold += this.goldPerTick;
-                         game.effects.push({ x: this.x, y: this.y - 30, text: `+${this.goldPerTick}💰`, color: '#f39c12', life: 30 });
-                         this.lastGoldTick = now;
-                         updateUI();
-                     }
-                     return;
-                 }
-                 
-                 if (this.type === 'cleric' && game.health < 100 && game.health > 0) {
-                     const adjustedSpeed = this.attackSpeed / game.gameSpeed;
-                     if (now - this.lastAttack > adjustedSpeed) { game.health = Math.min(100, game.health + 1 + this.level); updateUI(); }
-                 }
- 
-                 if (this.type === 'druid') {
+                for (let i = 1; i < segments; i++) {
+                    const progress = i / segments;
+                    const x = startX + (endX - startX) * progress;
+                    const yOffset = (i % 2 === 0 ? 1 : -1) * amplitude * (0.7 + Math.random() * 0.3);
+                    path.push({ x, y: centerY + yOffset });
+                }
+                path.push({ x: endX, y: centerY });
+            }
+            
+            game.path = path;
+        }
+
+        function getDifficultyMultiplier() { return 1 + (game.stage - 1) * 0.4; }
+        function getSpeedMultiplier() { return 1 + (game.stage - 1) * 0.15; }
+
+        class Enemy {
+            constructor(type) {
+                const config = enemyTypes[type];
+                const diffMult = getDifficultyMultiplier();
+                const speedMult = getSpeedMultiplier();
+                const goldMult = getGoldMultiplier(game.stage);
+                
+                this.type = type;
+                this.emoji = config.emoji;
+                this.maxHealth = Math.floor(config.health * (1 + game.wave * 0.15) * diffMult);
+                if (game.waveMutator) this.maxHealth = Math.floor(this.maxHealth * game.waveMutator.healthMult);
+                this.health = this.maxHealth;
+                this.baseSpeed = config.speed * speedMult;
+                if (game.waveMutator) this.baseSpeed *= game.waveMutator.speedMult;
+                this.speed = this.baseSpeed;
+                this.damage = Math.floor(config.damage * diffMult);
+                this.gold = Math.floor(config.gold * goldMult);
+                if (game.waveMutator) this.gold = Math.floor(this.gold * game.waveMutator.goldMult);
+                this.pathIndex = 0;
+                this.x = game.path[0].x;
+                this.y = game.path[0].y;
+                this.size = type === 'boss' ? 50 : 38;
+                this.dead = false;
+                this.armor = type === 'boss' ? 0.3 : (type === 'demon' ? 0.2 : 0);
+                if (game.waveMutator) this.armor += game.waveMutator.armorBonus;
+                this.slowed = false;
+                this.slowTimer = 0;
+                this.poisoned = false;
+                this.poisonDamage = 0;
+                this.poisonTimer = 0;
+                this.regenRate = game.waveMutator ? game.waveMutator.regenRate : 0;
+            }
+
+            update() {
+                if (this.dead) return;
+
+                if (this.poisoned && this.poisonTimer > 0) {
+                    this.poisonTimer -= game.gameSpeed;
+                    if (Math.random() < 0.05 * game.gameSpeed) {
+                        this.health -= this.poisonDamage;
+                        game.effects.push({ x: this.x + (Math.random() - 0.5) * 15, y: this.y - 15, text: `☠️${Math.floor(this.poisonDamage)}`, color: '#6c3483', life: 20 });
+                        if (this.health <= 0) { this.dead = true; game.gold += this.gold; game.kills++; updateUI(); return; }
+                        if (this.health <= 0) { handleEnemyDefeat(this); return; }
+                    }
+                } else { this.poisoned = false; }
+
+                if (this.regenRate > 0 && this.health > 0 && this.health < this.maxHealth) {
+                    this.health = Math.min(this.maxHealth, this.health + this.maxHealth * this.regenRate * game.gameSpeed);
+                }
+
+                if (this.slowed && this.slowTimer > 0) { this.slowTimer -= game.gameSpeed; this.speed = this.baseSpeed * 0.5; }
+                else { this.slowed = false; this.speed = this.baseSpeed; }
+
+                const target = game.path[this.pathIndex + 1];
+                if (!target) { this.reachCastle(); return; }
+
+                const dx = target.x - this.x;
+                const dy = target.y - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 10) {
+                    this.pathIndex++;
+                    if (this.pathIndex >= game.path.length - 1) this.reachCastle();
+                } else {
+                    const currentSpeed = this.speed * game.gameSpeed;
+                    this.x += (dx / dist) * currentSpeed;
+                    this.y += (dy / dist) * currentSpeed;
+                }
+            }
+
+            reachCastle() {
+                if (this.dead) return;
+                this.dead = true;
+                game.health -= this.damage;
+                updateUI();
+                if (game.health <= 0) { game.health = 0; endGame(false); }
+            }
+
+            draw() {
+                if (this.dead) return;
+
+                ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                ctx.beginPath();
+                ctx.ellipse(this.x, this.y + 22, 18, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.font = `${this.size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.emoji, this.x, this.y);
+
+                if (this.slowed) { ctx.fillStyle = 'rgba(116, 185, 255, 0.4)'; ctx.beginPath(); ctx.arc(this.x, this.y, 25, 0, Math.PI * 2); ctx.fill(); }
+                if (this.poisoned) { ctx.fillStyle = 'rgba(108, 52, 131, 0.4)'; ctx.beginPath(); ctx.arc(this.x, this.y, 22, 0, Math.PI * 2); ctx.fill(); }
+                if (game.waveMutator && game.waveMutator.aura) {
+                    ctx.strokeStyle = game.waveMutator.aura;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 27, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                const barWidth = 46, barHeight = 8;
+                const healthPct = this.health / this.maxHealth;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(this.x - barWidth/2 - 2, this.y - 30, barWidth + 4, barHeight + 4);
+                ctx.fillStyle = healthPct > 0.6 ? '#2ecc71' : healthPct > 0.3 ? '#f39c12' : '#e74c3c';
+                ctx.fillRect(this.x - barWidth/2, this.y - 28, barWidth * healthPct, barHeight);
+                
+                if (this.armor > 0) { ctx.fillStyle = '#ecf0f1'; ctx.font = 'bold 10px Arial'; ctx.fillText('🛡️', this.x + 20, this.y - 25); }
+            }
+
+            takeDamage(dmg, heroType = null) {
+                if (this.dead) return;
+                
+                const finalDamage = dmg * (1 - this.armor);
+                this.health -= finalDamage;
+                
+                if (heroType === 'frost') { this.slowed = true; this.slowTimer = 120; }
+                if (heroType === 'necro') { this.poisoned = true; this.poisonDamage = dmg * 0.3; this.poisonTimer = 180; }
+                
+                game.effects.push({ x: this.x + (Math.random() - 0.5) * 20, y: this.y - 20, text: `-${Math.floor(finalDamage)}`, color: '#ff6b6b', life: 25 });
+                
+                if (this.health <= 0) {
+                    this.dead = true;
+                    game.gold += this.gold;
+                    game.kills++;
+                    
+                    if (game.kills === 100 && !game.achievements.includes('kills100')) {
+                        showAchievement('kills100', '+200 ' + t('gold'));
+                        game.gold += 200;
+                        game.achievements.push('kills100');
+                    }
+                    if (game.kills === 500 && !game.achievements.includes('kills500')) {
+                        showAchievement('kills500', '+1000 ' + t('gold'));
+                        game.gold += 1000;
+                        game.achievements.push('kills500');
+                    }
+                    
+                    game.effects.push({ x: this.x, y: this.y, text: `+${this.gold}💰`, color: '#f1c40f', life: 35 });
+                    updateUI();
+                    handleEnemyDefeat(this);
+                }
+            }
+        }
+
+        class Hero {
+            constructor(type, x, y) {
+                const config = heroTypes[type];
+                this.type = type;
+                this.heroType = config.type;
+                this.image = config.image;
+                this.x = x;
+                this.y = y;
+                this.baseCost = config.cost;
+                this.baseDamage = config.damage;
+                this.damage = config.damage;
+                this.baseRange = config.range;
+                this.range = config.range;
+                this.baseAttackSpeed = config.attackSpeed;
+                this.attackSpeed = config.attackSpeed;
+                this.color = config.color;
+                this.lastAttack = 0;
+                this.lastGoldTick = 0;
+                this.level = 1;
+                this.upgradeCost = Math.floor(config.cost * 0.5);
+                this.target = null;
+                this.totalInvested = config.cost;
+                
+                if (type === 'farm') { this.goldPerTick = config.goldPerTick; this.tickInterval = config.attackSpeed; }
+            }
+
+            getSellPrice() { return Math.floor(this.totalInvested * 0.5); }
+
+            getDamageWithBuffs() {
+                let damage = this.damage;
+                for (const hero of game.heroes) {
+                    if (hero.type === 'paladin' && hero !== this) {
+                        const dist = Math.sqrt((this.x - hero.x) ** 2 + (this.y - hero.y) ** 2);
+                        if (dist < 150) { damage *= 1.2; break; }
+                    }
+                }
+                damage *= getComboDamageMultiplier();
+                return damage;
+            }
+
+            update() {
+                const now = Date.now();
+                
+                if (this.type === 'farm') {
+                    if (!game.waveActive) { this.lastGoldTick = now; return; }
+                    if (this.lastGoldTick === 0) this.lastGoldTick = now;
+                    const adjustedInterval = this.tickInterval / game.gameSpeed;
+                    if (now - this.lastGoldTick >= adjustedInterval) {
+                        game.gold += this.goldPerTick;
+                        game.effects.push({ x: this.x, y: this.y - 30, text: `+${this.goldPerTick}💰`, color: '#f39c12', life: 30 });
+                        this.lastGoldTick = now;
+                        updateUI();
+                    }
+                    return;
+                }
+                
+                if (this.type === 'cleric' && game.health < 100 && game.health > 0) {
+                    const adjustedSpeed = this.attackSpeed / game.gameSpeed;
+                    if (now - this.lastAttack > adjustedSpeed) { game.health = Math.min(100, game.health + 1 + this.level); updateUI(); }
+                }
+
+                if (this.type === 'druid') {
 @@ -2165,110 +2254,126 @@
-             const btn = document.getElementById('speed-btn');
-             if (game.gameSpeed === 1) { game.gameSpeed = 2; btn.textContent = '⚡ 2x'; btn.classList.add('active'); }
-             else { game.gameSpeed = 1; btn.textContent = '⚡ 1x'; btn.classList.remove('active'); }
-         }
- 
-         document.getElementById('auto-wave-btn').addEventListener('click', toggleAutoWave);
- 
-         function toggleAutoWave() {
-             game.autoWave = !game.autoWave;
-             const btn = document.getElementById('auto-wave-btn');
-             if (game.autoWave) {
-                 btn.textContent = '🔄 ' + t('autoOn');
-                 btn.classList.add('active');
-                 if (!game.waveActive && !game.gameOver && !game.stagePaused && game.wave < game.maxWaves) setTimeout(startWave, 500);
-             } else {
-                 btn.textContent = '🔄 ' + t('autoOff');
-                 btn.classList.remove('active');
-             }
-         }
- 
-         document.getElementById('start-wave-btn').addEventListener('click', startWave);
- 
-         function startWave() {
-             if (game.waveActive || game.gameOver || game.stagePaused) return;
-             game.wave++; game.waveActive = true; game.enemiesSpawned = 0;
-+            resetCombo();
-+            chooseWaveMutator();
-             document.getElementById('start-wave-btn').disabled = true;
- 
-             const now = Date.now();
-             for (const hero of game.heroes) { if (hero.type === 'farm') hero.lastGoldTick = now; }
- 
-             let enemyCount, types, speedMult;
-             const stageBonus = game.stage - 1;
-             
-             if (game.wave === 25) showBossWarning();
-             
-             if (game.wave <= 3) { enemyCount = 5 + game.wave * 2 + stageBonus * 3; types = ['goblin']; if (game.stage >= 3) types.push('orc'); speedMult = 1; }
-             else if (game.wave <= 6) { enemyCount = 8 + game.wave * 2 + stageBonus * 4; types = ['goblin', 'orc']; if (game.stage >= 2) types.push('troll'); speedMult = 1.1; }
-             else if (game.wave <= 10) { enemyCount = 12 + game.wave * 2 + stageBonus * 5; types = ['goblin', 'orc', 'troll']; if (game.stage >= 3) types.push('ogre'); speedMult = 1.15; }
-             else if (game.wave <= 15) { enemyCount = 18 + game.wave * 2 + stageBonus * 6; types = ['orc', 'troll', 'ogre']; if (game.stage >= 2) types.push('dragon'); if (game.stage >= 4) types.push('demon'); speedMult = 1.2; }
-             else if (game.wave <= 20) { enemyCount = 25 + game.wave * 2 + stageBonus * 7; types = ['troll', 'ogre', 'dragon']; if (game.stage >= 3) types.push('demon'); speedMult = 1.25; }
-             else if (game.wave <= 24) { enemyCount = 30 + game.wave * 2 + stageBonus * 8; types = ['ogre', 'dragon', 'demon']; speedMult = 1.3; }
-             else { enemyCount = 15 + stageBonus * 5; types = ['dragon', 'demon', 'boss']; speedMult = 1.35; }
- 
-             game.totalEnemiesToSpawn = enemyCount;
-+            if (game.waveMutator && game.waveMutator.key !== "mutatorNone") {
-+                game.effects.push({
-+                    x: canvas.width / 2,
-+                    y: 110,
-+                    text: `🧬 ${t('mutator')}: ${t(game.waveMutator.key)}`,
-+                    color: game.waveMutator.aura || "#9b59b6",
-+                    life: 75
-+                });
-+            }
- 
-             const spawnInterval = setInterval(() => {
-                 if (game.enemiesSpawned >= enemyCount || game.gameOver) { clearInterval(spawnInterval); return; }
-                 const type = types[Math.floor(Math.random() * types.length)];
-                 const enemy = new Enemy(type);
-                 enemy.baseSpeed *= speedMult;
-                 game.enemies.push(enemy);
-                 game.enemiesSpawned++;
-             }, 600 / game.gameSpeed);
- 
-             updateUI();
-         }
- 
-         function updateUI() {
-             document.getElementById('health').textContent = Math.max(0, Math.floor(game.health));
-             document.getElementById('gold').textContent = game.gold;
-             document.getElementById('wave').textContent = game.wave;
-             document.getElementById('stage').textContent = game.stage;
-             document.getElementById('kills').textContent = game.kills;
-+            document.getElementById('combo').textContent = `x${game.combo}`;
- 
-             document.querySelectorAll('.hero-card').forEach(card => {
-                 const type = card.dataset.type;
-                 if (heroTypes[type]) card.classList.toggle('disabled', game.gold < heroTypes[type].cost);
-             });
- 
-             if (game.selectedHeroForUpgrade) updateUpgradeMenuContent();
-         }
- 
-         function checkWaveEnd() {
-             if (!game.waveActive || game.gameOver) return;
-             const aliveEnemies = game.enemies.filter(e => !e.dead);
-             
-             if (aliveEnemies.length === 0 && game.enemiesSpawned >= game.totalEnemiesToSpawn) {
-                 game.waveActive = false; game.enemies = [];
-                 document.getElementById('start-wave-btn').disabled = false;
- 
-                 const bonus = 30 + game.wave * 10 + game.stage * 20;
--                game.gold += bonus;
-+                const comboBonus = Math.floor((game.maxCombo - 1) * 8);
-+                game.gold += bonus + comboBonus;
-                 
-                 game.effects.push({ x: canvas.width / 2, y: canvas.height / 2 - 50, text: `🎉 ${t('waveComplete', game.wave)}`, color: '#f1c40f', life: 50 });
-                 game.effects.push({ x: canvas.width / 2, y: canvas.height / 2, text: `+${bonus}💰 ${t('bonus')}`, color: '#2ecc71', life: 50 });
-+                if (comboBonus > 0) {
-+                    game.effects.push({ x: canvas.width / 2, y: canvas.height / 2 + 35, text: `🔥 +${comboBonus}💰 ${t('comboBonus')}`, color: '#e67e22', life: 55 });
-+                }
-                 
-                 updateUI();
- 
-                 if (game.wave >= game.maxWaves) setTimeout(() => showStageComplete(), 1500);
-                 else if (game.autoWave) {
-                     game.effects.push({ x: canvas.width / 2, y: canvas.height / 2 + 50, text: `🔄 ${t('nextWaveIn')}`, color: '#9b59b6', life: 60 });
-                     setTimeout(() => { if (game.autoWave && !game.gameOver && !game.stagePaused) startWave(); }, 2000 / game.gameSpeed);
-                 }
-             }
-         }
- 
-         function showStageComplete() {
-             game.stagePaused = true; game.autoWave = false;
-             document.getElementById('auto-wave-btn').textContent = '🔄 ' + t('autoOff');
-             document.getElementById('auto-wave-btn').classList.remove('active');
- 
-             const stageBonus = 500 * game.stage;
-             game.gold += stageBonus;
-             
-             const nextStage = game.stage + 1;
-             const nextDiff = stageDifficulty[Math.min(nextStage, 5)];
-             const currentDiff = stageDifficulty[Math.min(game.stage, 5)];
-             const currentGoldMult = getGoldMultiplier(game.stage);
-             const nextGoldMult = getGoldMultiplier(nextStage);
- 
+            const btn = document.getElementById('speed-btn');
+            if (game.gameSpeed === 1) { game.gameSpeed = 2; btn.textContent = '⚡ 2x'; btn.classList.add('active'); }
+            else { game.gameSpeed = 1; btn.textContent = '⚡ 1x'; btn.classList.remove('active'); }
+        }
+
+        document.getElementById('auto-wave-btn').addEventListener('click', toggleAutoWave);
+
+        function toggleAutoWave() {
+            game.autoWave = !game.autoWave;
+            const btn = document.getElementById('auto-wave-btn');
+            if (game.autoWave) {
+                btn.textContent = '🔄 ' + t('autoOn');
+                btn.classList.add('active');
+                if (!game.waveActive && !game.gameOver && !game.stagePaused && game.wave < game.maxWaves) setTimeout(startWave, 500);
+            } else {
+                btn.textContent = '🔄 ' + t('autoOff');
+                btn.classList.remove('active');
+            }
+        }
+
+        document.getElementById('start-wave-btn').addEventListener('click', startWave);
+
+        function startWave() {
+            if (game.waveActive || game.gameOver || game.stagePaused) return;
+            game.wave++; game.waveActive = true; game.enemiesSpawned = 0;
+            resetCombo();
+            chooseWaveMutator();
+            document.getElementById('start-wave-btn').disabled = true;
+
+            const now = Date.now();
+            for (const hero of game.heroes) { if (hero.type === 'farm') hero.lastGoldTick = now; }
+
+            let enemyCount, types, speedMult;
+            const stageBonus = game.stage - 1;
+            
+            if (game.wave === 25) showBossWarning();
+            
+            if (game.wave <= 3) { enemyCount = 5 + game.wave * 2 + stageBonus * 3; types = ['goblin']; if (game.stage >= 3) types.push('orc'); speedMult = 1; }
+            else if (game.wave <= 6) { enemyCount = 8 + game.wave * 2 + stageBonus * 4; types = ['goblin', 'orc']; if (game.stage >= 2) types.push('troll'); speedMult = 1.1; }
+            else if (game.wave <= 10) { enemyCount = 12 + game.wave * 2 + stageBonus * 5; types = ['goblin', 'orc', 'troll']; if (game.stage >= 3) types.push('ogre'); speedMult = 1.15; }
+            else if (game.wave <= 15) { enemyCount = 18 + game.wave * 2 + stageBonus * 6; types = ['orc', 'troll', 'ogre']; if (game.stage >= 2) types.push('dragon'); if (game.stage >= 4) types.push('demon'); speedMult = 1.2; }
+            else if (game.wave <= 20) { enemyCount = 25 + game.wave * 2 + stageBonus * 7; types = ['troll', 'ogre', 'dragon']; if (game.stage >= 3) types.push('demon'); speedMult = 1.25; }
+            else if (game.wave <= 24) { enemyCount = 30 + game.wave * 2 + stageBonus * 8; types = ['ogre', 'dragon', 'demon']; speedMult = 1.3; }
+            else { enemyCount = 15 + stageBonus * 5; types = ['dragon', 'demon', 'boss']; speedMult = 1.35; }
+
+            game.totalEnemiesToSpawn = enemyCount;
+            if (game.waveMutator && game.waveMutator.key !== "mutatorNone") {
+                game.effects.push({
+                    x: canvas.width / 2,
+                    y: 110,
+                    text: `🧬 ${t('mutator')}: ${t(game.waveMutator.key)}`,
+                    color: game.waveMutator.aura || "#9b59b6",
+                    life: 75
+                });
+            }
+
+            const spawnInterval = setInterval(() => {
+                if (game.enemiesSpawned >= enemyCount || game.gameOver) { clearInterval(spawnInterval); return; }
+                const type = types[Math.floor(Math.random() * types.length)];
+                const enemy = new Enemy(type);
+                enemy.baseSpeed *= speedMult;
+                game.enemies.push(enemy);
+                game.enemiesSpawned++;
+            }, 600 / game.gameSpeed);
+
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('health').textContent = Math.max(0, Math.floor(game.health));
+            document.getElementById('gold').textContent = game.gold;
+            document.getElementById('wave').textContent = game.wave;
+            document.getElementById('stage').textContent = game.stage;
+            document.getElementById('kills').textContent = game.kills;
+            document.getElementById('combo').textContent = `x${game.combo}`;
+
+            document.querySelectorAll('.hero-card').forEach(card => {
+                const type = card.dataset.type;
+                if (heroTypes[type]) card.classList.toggle('disabled', game.gold < heroTypes[type].cost);
+            });
+
+            if (game.selectedHeroForUpgrade) updateUpgradeMenuContent();
+        }
+
+        function checkWaveEnd() {
+            if (!game.waveActive || game.gameOver) return;
+            const aliveEnemies = game.enemies.filter(e => !e.dead);
+            
+            if (aliveEnemies.length === 0 && game.enemiesSpawned >= game.totalEnemiesToSpawn) {
+                game.waveActive = false; game.enemies = [];
+                document.getElementById('start-wave-btn').disabled = false;
+
+                const bonus = 30 + game.wave * 10 + game.stage * 20;
+                game.gold += bonus;
+                const comboBonus = Math.floor((game.maxCombo - 1) * 8);
+                game.gold += bonus + comboBonus;
+                
+                game.effects.push({ x: canvas.width / 2, y: canvas.height / 2 - 50, text: `🎉 ${t('waveComplete', game.wave)}`, color: '#f1c40f', life: 50 });
+                game.effects.push({ x: canvas.width / 2, y: canvas.height / 2, text: `+${bonus}💰 ${t('bonus')}`, color: '#2ecc71', life: 50 });
+                if (comboBonus > 0) {
+                    game.effects.push({ x: canvas.width / 2, y: canvas.height / 2 + 35, text: `🔥 +${comboBonus}💰 ${t('comboBonus')}`, color: '#e67e22', life: 55 });
+                }
+                
+                updateUI();
+
+                if (game.wave >= game.maxWaves) setTimeout(() => showStageComplete(), 1500);
+                else if (game.autoWave) {
+                    game.effects.push({ x: canvas.width / 2, y: canvas.height / 2 + 50, text: `🔄 ${t('nextWaveIn')}`, color: '#9b59b6', life: 60 });
+                    setTimeout(() => { if (game.autoWave && !game.gameOver && !game.stagePaused) startWave(); }, 2000 / game.gameSpeed);
+                }
+            }
+        }
+
+        function showStageComplete() {
+            game.stagePaused = true; game.autoWave = false;
+            document.getElementById('auto-wave-btn').textContent = '🔄 ' + t('autoOff');
+            document.getElementById('auto-wave-btn').classList.remove('active');
+
+            const stageBonus = 500 * game.stage;
+            game.gold += stageBonus;
+            
+            const nextStage = game.stage + 1;
+            const nextDiff = stageDifficulty[Math.min(nextStage, 5)];
+            const currentDiff = stageDifficulty[Math.min(game.stage, 5)];
+            const currentGoldMult = getGoldMultiplier(game.stage);
+            const nextGoldMult = getGoldMultiplier(nextStage);
+
 @@ -2317,50 +2422,52 @@
-                 generatePath(); updateUI();
-             });
- 
-             document.getElementById('continue-endless-btn').addEventListener('click', () => {
-                 game.wave = 0; game.maxWaves = 25; game.stagePaused = false;
-                 document.getElementById('stage-complete-screen').remove();
-                 updateUI();
-                 game.effects.push({ x: canvas.width / 2, y: canvas.height / 2, text: `♾️ ${t('infiniteMode')}`, color: '#3498db', life: 60 });
-             });
- 
-             document.getElementById('restart-game-btn').addEventListener('click', () => location.reload());
-             updateUI();
-         }
- 
-         function getDifficultyMultiplierForStage(stage) { return 1 + (stage - 1) * 0.4; }
- 
-         function restartCurrentStage() {
-             const currentStage = game.stage;
-             game.health = 100; game.gold = getStartingGold(currentStage);
-             game.wave = 0; game.maxWaves = 25; game.enemies = []; game.heroes = [];
-             game.projectiles = []; game.effects = []; game.selectedHeroType = null;
-             game.selectedHeroForUpgrade = null; game.waveActive = false; game.autoWave = false;
-             game.gameOver = false; game.stagePaused = false; game.enemiesSpawned = 0;
-             game.totalEnemiesToSpawn = 0; game.gameSpeed = 1; game.kills = 0;
-             game.abilityCooldown = 0; game.abilityReady = true; game.lastAbilityUse = 0;
-+            resetCombo();
-+            game.waveMutator = null;
-             
-             document.getElementById('auto-wave-btn').textContent = '🔄 ' + t('autoOff');
-             document.getElementById('auto-wave-btn').classList.remove('active');
-             document.getElementById('speed-btn').textContent = '⚡ 1x';
-             document.getElementById('speed-btn').classList.remove('active');
-             document.getElementById('start-wave-btn').disabled = false;
-             
-             const gameOverScreen = document.getElementById('game-over-screen');
-             if (gameOverScreen) gameOverScreen.remove();
-             
-             closeUpgradeMenu(); generatePath(); updateUI(); gameLoop();
-         }
- 
-         function endGame(victory) {
-             game.gameOver = true; game.autoWave = false;
-             document.getElementById('auto-wave-btn').textContent = '🔄 ' + t('autoOff');
-             document.getElementById('auto-wave-btn').classList.remove('active');
- 
-             const screen = document.createElement('div');
-             screen.className = 'game-over-screen';
-             screen.id = 'game-over-screen';
-             
-             const totalFarms = game.heroes.filter(h => h.type === 'farm').length;
-             const totalWaves = (game.stage - 1) * 25 + game.wave;
-             const currentDiff = stageDifficulty[Math.min(game.stage, 5)];
+                generatePath(); updateUI();
+            });
+
+            document.getElementById('continue-endless-btn').addEventListener('click', () => {
+                game.wave = 0; game.maxWaves = 25; game.stagePaused = false;
+                document.getElementById('stage-complete-screen').remove();
+                updateUI();
+                game.effects.push({ x: canvas.width / 2, y: canvas.height / 2, text: `♾️ ${t('infiniteMode')}`, color: '#3498db', life: 60 });
+            });
+
+            document.getElementById('restart-game-btn').addEventListener('click', () => location.reload());
+            updateUI();
+        }
+
+        function getDifficultyMultiplierForStage(stage) { return 1 + (stage - 1) * 0.4; }
+
+        function restartCurrentStage() {
+            const currentStage = game.stage;
+            game.health = 100; game.gold = getStartingGold(currentStage);
+            game.wave = 0; game.maxWaves = 25; game.enemies = []; game.heroes = [];
+            game.projectiles = []; game.effects = []; game.selectedHeroType = null;
+            game.selectedHeroForUpgrade = null; game.waveActive = false; game.autoWave = false;
+            game.gameOver = false; game.stagePaused = false; game.enemiesSpawned = 0;
+            game.totalEnemiesToSpawn = 0; game.gameSpeed = 1; game.kills = 0;
+            game.abilityCooldown = 0; game.abilityReady = true; game.lastAbilityUse = 0;
+            resetCombo();
+            game.waveMutator = null;
+            
+            document.getElementById('auto-wave-btn').textContent = '🔄 ' + t('autoOff');
+            document.getElementById('auto-wave-btn').classList.remove('active');
+            document.getElementById('speed-btn').textContent = '⚡ 1x';
+            document.getElementById('speed-btn').classList.remove('active');
+            document.getElementById('start-wave-btn').disabled = false;
+            
+            const gameOverScreen = document.getElementById('game-over-screen');
+            if (gameOverScreen) gameOverScreen.remove();
+            
+            closeUpgradeMenu(); generatePath(); updateUI(); gameLoop();
+        }
+
+        function endGame(victory) {
+            game.gameOver = true; game.autoWave = false;
+            document.getElementById('auto-wave-btn').textContent = '🔄 ' + t('autoOff');
+            document.getElementById('auto-wave-btn').classList.remove('active');
+
+            const screen = document.createElement('div');
+            screen.className = 'game-over-screen';
+            screen.id = 'game-over-screen';
+            
+            const totalFarms = game.heroes.filter(h => h.type === 'farm').length;
+            const totalWaves = (game.stage - 1) * 25 + game.wave;
+            const currentDiff = stageDifficulty[Math.min(game.stage, 5)];
 @@ -2400,50 +2507,54 @@
-                     </div>
-                 `;
-                 document.body.appendChild(screen);
-                 document.getElementById('retry-stage-btn').addEventListener('click', () => restartCurrentStage());
-                 document.getElementById('restart-game-btn').addEventListener('click', () => location.reload());
-             }
-         }
- 
-         function gameLoop() {
-             if (game.gameOver) return;
-             drawBackground(); drawPath(); drawStructures();
-             for (const hero of game.heroes) { hero.update(); hero.draw(); }
-             for (const enemy of game.enemies) { if (!enemy.dead) { enemy.update(); enemy.draw(); } }
-             game.projectiles = game.projectiles.filter(p => !p.dead);
-             for (const projectile of game.projectiles) { projectile.update(); projectile.draw(); }
-             drawEffects(); checkWaveEnd(); updateAbilityCooldown();
- 
-             const diff = stageDifficulty[Math.min(game.stage, 5)];
-             const goldMult = getGoldMultiplier(game.stage);
-             ctx.font = 'bold 14px Arial'; ctx.fillStyle = '#fff'; ctx.textAlign = 'left';
-             ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
-             const speedText = game.gameSpeed > 1 ? ` | ⚡${game.gameSpeed}x` : '';
-             const stageText = `🏰 ${t('stage').toUpperCase()} ${game.stage} - ${t(diff.key)} | 💰 ${goldMult}x ${t('gold').toLowerCase()}${speedText}`;
-             ctx.strokeText(stageText, 15, 25);
-             ctx.fillText(stageText, 15, 25);
-+            const mutatorText = game.waveMutator ? `${t('mutator')}: ${t(game.waveMutator.key)}` : `${t('mutator')}: ${t('mutatorNone')}`;
-+            ctx.font = "bold 13px Arial";
-+            ctx.strokeText(`🔥 Combo x${game.combo} | 🧬 ${mutatorText}`, 15, 44);
-+            ctx.fillText(`🔥 Combo x${game.combo} | 🧬 ${mutatorText}`, 15, 44);
- 
-             if (game.selectedHeroType && !game.stagePaused) {
-                 ctx.font = 'bold 18px Arial'; ctx.fillStyle = '#fff';
-                 ctx.strokeStyle = '#000'; ctx.lineWidth = 4; ctx.textAlign = 'center';
-                 const config = heroTypes[game.selectedHeroType];
-                 const text = `🎯 ${config.image} ${t(game.selectedHeroType)}`;
-                 ctx.strokeText(text, canvas.width / 2, canvas.height - 25);
-                 ctx.fillText(text, canvas.width / 2, canvas.height - 25);
-             }
- 
-             requestAnimationFrame(gameLoop);
-         }
- 
-         function init() {
-             setupCanvas();
-             createShop();
-             document.getElementById('instructions').innerHTML = t('instructions');
-             updateUI();
-             gameLoop();
-         }
- 
-         window.addEventListener('load', init);
-         window.addEventListener('resize', () => setupCanvas());
-     </script>
- </body>
- 
-EOF
-)
+                    </div>
+                `;
+                document.body.appendChild(screen);
+                document.getElementById('retry-stage-btn').addEventListener('click', () => restartCurrentStage());
+                document.getElementById('restart-game-btn').addEventListener('click', () => location.reload());
+            }
+        }
+
+        function gameLoop() {
+            if (game.gameOver) return;
+            drawBackground(); drawPath(); drawStructures();
+            for (const hero of game.heroes) { hero.update(); hero.draw(); }
+            for (const enemy of game.enemies) { if (!enemy.dead) { enemy.update(); enemy.draw(); } }
+            game.projectiles = game.projectiles.filter(p => !p.dead);
+            for (const projectile of game.projectiles) { projectile.update(); projectile.draw(); }
+            drawEffects(); checkWaveEnd(); updateAbilityCooldown();
+
+            const diff = stageDifficulty[Math.min(game.stage, 5)];
+            const goldMult = getGoldMultiplier(game.stage);
+            ctx.font = 'bold 14px Arial'; ctx.fillStyle = '#fff'; ctx.textAlign = 'left';
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+            const speedText = game.gameSpeed > 1 ? ` | ⚡${game.gameSpeed}x` : '';
+            const stageText = `🏰 ${t('stage').toUpperCase()} ${game.stage} - ${t(diff.key)} | 💰 ${goldMult}x ${t('gold').toLowerCase()}${speedText}`;
+            ctx.strokeText(stageText, 15, 25);
+            ctx.fillText(stageText, 15, 25);
+            const mutatorText = game.waveMutator ? `${t('mutator')}: ${t(game.waveMutator.key)}` : `${t('mutator')}: ${t('mutatorNone')}`;
+            ctx.font = "bold 13px Arial";
+            ctx.strokeText(`🔥 Combo x${game.combo} | 🧬 ${mutatorText}`, 15, 44);
+            ctx.fillText(`🔥 Combo x${game.combo} | 🧬 ${mutatorText}`, 15, 44);
+
+            if (game.selectedHeroType && !game.stagePaused) {
+                ctx.font = 'bold 18px Arial'; ctx.fillStyle = '#fff';
+                ctx.strokeStyle = '#000'; ctx.lineWidth = 4; ctx.textAlign = 'center';
+                const config = heroTypes[game.selectedHeroType];
+                const text = `🎯 ${config.image} ${t(game.selectedHeroType)}`;
+                ctx.strokeText(text, canvas.width / 2, canvas.height - 25);
+                ctx.fillText(text, canvas.width / 2, canvas.height - 25);
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function init() {
+            setupCanvas();
+            createShop();
+            document.getElementById('instructions').innerHTML = t('instructions');
+            updateUI();
+            gameLoop();
+        }
+
+        window.addEventListener('load', init);
+        window.addEventListener('resize', () => setupCanvas());
+    </script>
+</body>
