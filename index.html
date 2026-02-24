@@ -762,6 +762,10 @@
                 <span class="stat-icon">💀</span>
                 <span><span data-i18n="kills">Mortes</span>: <span id="kills">0</span></span>
             </div>
+            <div class="stat combo">
+                <span class="stat-icon">🔥</span>
+                <span><span data-i18n="combo">Combo</span>: <span id="combo">x1</span></span>
+            </div>
             <div class="stage-info">
                 🏰 <span data-i18n="stage">Fase</span>: <span id="stage">1</span>
             </div>
@@ -813,6 +817,7 @@
                 health: "Vida",
                 gold: "Ouro",
                 kills: "Mortes",
+                combo: "Combo",
                 stage: "Fase",
                 wave: "Onda",
                 power: "PODER",
@@ -887,6 +892,13 @@
                 bossWarning: "⚠️ CHEFÃO APARECENDO! ⚠️",
                 paused: "PAUSADA",
                 crit: "CRIT!",
+                comboBonus: "BÔNUS DE COMBO",
+                mutator: "Mutador",
+                mutatorNone: "Padrão",
+                mutatorFrenzy: "Frenesi",
+                mutatorTank: "Fortificados",
+                mutatorRegen: "Regeneração",
+                mutatorGolden: "Tesouro",
                 
                 // Game Over
                 gameOver: "💀 GAME OVER 💀",
@@ -950,6 +962,7 @@
                 health: "Vida",
                 gold: "Oro",
                 kills: "Muertes",
+                combo: "Combo",
                 stage: "Etapa",
                 wave: "Oleada",
                 power: "PODER",
@@ -1024,6 +1037,13 @@
                 bossWarning: "⚠️ ¡JEFE APARECIENDO! ⚠️",
                 paused: "PAUSADA",
                 crit: "¡CRIT!",
+                comboBonus: "BONO DE COMBO",
+                mutator: "Mutador",
+                mutatorNone: "Estándar",
+                mutatorFrenzy: "Frenesí",
+                mutatorTank: "Fortificados",
+                mutatorRegen: "Regeneración",
+                mutatorGolden: "Tesoro",
                 
                 // Game Over
                 gameOver: "💀 FIN DEL JUEGO 💀",
@@ -1087,6 +1107,7 @@
                 health: "Health",
                 gold: "Gold",
                 kills: "Kills",
+                combo: "Combo",
                 stage: "Stage",
                 wave: "Wave",
                 power: "POWER",
@@ -1161,6 +1182,13 @@
                 bossWarning: "⚠️ BOSS INCOMING! ⚠️",
                 paused: "PAUSED",
                 crit: "CRIT!",
+                comboBonus: "COMBO BONUS",
+                mutator: "Mutator",
+                mutatorNone: "Standard",
+                mutatorFrenzy: "Frenzy",
+                mutatorTank: "Fortified",
+                mutatorRegen: "Regeneration",
+                mutatorGolden: "Treasure",
                 
                 // Game Over
                 gameOver: "💀 GAME OVER 💀",
@@ -1308,7 +1336,19 @@
             lastAbilityUse: 0,
             criticalChance: 0.10,
             bossWarningActive: false,
-            achievements: []
+            achievements: [],
+            combo: 1,
+            maxCombo: 1,
+            comboTimeout: 0,
+            waveMutator: null
+        };
+
+        const waveMutators = {
+            none: { key: "mutatorNone", healthMult: 1, speedMult: 1, goldMult: 1, armorBonus: 0, regenRate: 0, aura: null },
+            frenzy: { key: "mutatorFrenzy", healthMult: 0.9, speedMult: 1.35, goldMult: 1.2, armorBonus: 0, regenRate: 0, aura: "#e74c3c" },
+            tank: { key: "mutatorTank", healthMult: 1.45, speedMult: 0.82, goldMult: 1.3, armorBonus: 0.08, regenRate: 0, aura: "#95a5a6" },
+            regen: { key: "mutatorRegen", healthMult: 1.2, speedMult: 1, goldMult: 1.25, armorBonus: 0, regenRate: 0.004, aura: "#2ecc71" },
+            golden: { key: "mutatorGolden", healthMult: 1.1, speedMult: 1.1, goldMult: 1.65, armorBonus: 0, regenRate: 0, aura: "#f1c40f" }
         };
 
         const heroCategories = {
@@ -1372,6 +1412,54 @@
                 return { damage: baseDamage * 1.25, isCritical: true };
             }
             return { damage: baseDamage, isCritical: false };
+        }
+
+        function resetCombo() {
+            game.combo = 1;
+            game.maxCombo = 1;
+            game.comboTimeout = 0;
+        }
+
+        function registerKill() {
+            const now = Date.now();
+            if (now < game.comboTimeout) game.combo = Math.min(20, game.combo + 1);
+            else game.combo = 1;
+            game.comboTimeout = now + 3000;
+            game.maxCombo = Math.max(game.maxCombo, game.combo);
+        }
+
+        function getComboDamageMultiplier() {
+            return 1 + Math.min(0.4, (game.combo - 1) * 0.02);
+        }
+
+        function handleEnemyDefeat(enemy) {
+            enemy.dead = true;
+            registerKill();
+            game.gold += enemy.gold;
+            game.kills++;
+
+            if (game.kills === 100 && !game.achievements.includes('kills100')) {
+                showAchievement('kills100', '+200 ' + t('gold'));
+                game.gold += 200;
+                game.achievements.push('kills100');
+            }
+            if (game.kills === 500 && !game.achievements.includes('kills500')) {
+                showAchievement('kills500', '+1000 ' + t('gold'));
+                game.gold += 1000;
+                game.achievements.push('kills500');
+            }
+
+            const comboText = game.combo > 1 ? ` x${game.combo}` : '';
+            game.effects.push({ x: enemy.x, y: enemy.y, text: `+${enemy.gold}💰${comboText}`, color: '#f1c40f', life: 35 });
+            updateUI();
+        }
+
+        function chooseWaveMutator() {
+            const mutatorPool = ['none', 'frenzy', 'tank', 'regen', 'golden'];
+            const waveScale = Math.min(0.85, game.wave / 35);
+            const guaranteed = game.wave > 4 && Math.random() < waveScale;
+            const pick = guaranteed ? mutatorPool[1 + Math.floor(Math.random() * (mutatorPool.length - 1))] : 'none';
+            game.waveMutator = waveMutators[pick];
         }
 
         function useAbility() {
@@ -1509,22 +1597,27 @@
                 this.type = type;
                 this.emoji = config.emoji;
                 this.maxHealth = Math.floor(config.health * (1 + game.wave * 0.15) * diffMult);
+                if (game.waveMutator) this.maxHealth = Math.floor(this.maxHealth * game.waveMutator.healthMult);
                 this.health = this.maxHealth;
                 this.baseSpeed = config.speed * speedMult;
+                if (game.waveMutator) this.baseSpeed *= game.waveMutator.speedMult;
                 this.speed = this.baseSpeed;
                 this.damage = Math.floor(config.damage * diffMult);
                 this.gold = Math.floor(config.gold * goldMult);
+                if (game.waveMutator) this.gold = Math.floor(this.gold * game.waveMutator.goldMult);
                 this.pathIndex = 0;
                 this.x = game.path[0].x;
                 this.y = game.path[0].y;
                 this.size = type === 'boss' ? 50 : 38;
                 this.dead = false;
                 this.armor = type === 'boss' ? 0.3 : (type === 'demon' ? 0.2 : 0);
+                if (game.waveMutator) this.armor += game.waveMutator.armorBonus;
                 this.slowed = false;
                 this.slowTimer = 0;
                 this.poisoned = false;
                 this.poisonDamage = 0;
                 this.poisonTimer = 0;
+                this.regenRate = game.waveMutator ? game.waveMutator.regenRate : 0;
             }
 
             update() {
@@ -1535,9 +1628,13 @@
                     if (Math.random() < 0.05 * game.gameSpeed) {
                         this.health -= this.poisonDamage;
                         game.effects.push({ x: this.x + (Math.random() - 0.5) * 15, y: this.y - 15, text: `☠️${Math.floor(this.poisonDamage)}`, color: '#6c3483', life: 20 });
-                        if (this.health <= 0) { this.dead = true; game.gold += this.gold; game.kills++; updateUI(); return; }
+                        if (this.health <= 0) { handleEnemyDefeat(this); return; }
                     }
                 } else { this.poisoned = false; }
+
+                if (this.regenRate > 0 && this.health > 0 && this.health < this.maxHealth) {
+                    this.health = Math.min(this.maxHealth, this.health + this.maxHealth * this.regenRate * game.gameSpeed);
+                }
 
                 if (this.slowed && this.slowTimer > 0) { this.slowTimer -= game.gameSpeed; this.speed = this.baseSpeed * 0.5; }
                 else { this.slowed = false; this.speed = this.baseSpeed; }
@@ -1582,6 +1679,13 @@
 
                 if (this.slowed) { ctx.fillStyle = 'rgba(116, 185, 255, 0.4)'; ctx.beginPath(); ctx.arc(this.x, this.y, 25, 0, Math.PI * 2); ctx.fill(); }
                 if (this.poisoned) { ctx.fillStyle = 'rgba(108, 52, 131, 0.4)'; ctx.beginPath(); ctx.arc(this.x, this.y, 22, 0, Math.PI * 2); ctx.fill(); }
+                if (game.waveMutator && game.waveMutator.aura) {
+                    ctx.strokeStyle = game.waveMutator.aura;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 27, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
 
                 const barWidth = 46, barHeight = 8;
                 const healthPct = this.health / this.maxHealth;
@@ -1605,23 +1709,7 @@
                 game.effects.push({ x: this.x + (Math.random() - 0.5) * 20, y: this.y - 20, text: `-${Math.floor(finalDamage)}`, color: '#ff6b6b', life: 25 });
                 
                 if (this.health <= 0) {
-                    this.dead = true;
-                    game.gold += this.gold;
-                    game.kills++;
-                    
-                    if (game.kills === 100 && !game.achievements.includes('kills100')) {
-                        showAchievement('kills100', '+200 ' + t('gold'));
-                        game.gold += 200;
-                        game.achievements.push('kills100');
-                    }
-                    if (game.kills === 500 && !game.achievements.includes('kills500')) {
-                        showAchievement('kills500', '+1000 ' + t('gold'));
-                        game.gold += 1000;
-                        game.achievements.push('kills500');
-                    }
-                    
-                    game.effects.push({ x: this.x, y: this.y, text: `+${this.gold}💰`, color: '#f1c40f', life: 35 });
-                    updateUI();
+                    handleEnemyDefeat(this);
                 }
             }
         }
@@ -1662,6 +1750,7 @@
                         if (dist < 150) { damage *= 1.2; break; }
                     }
                 }
+                damage *= getComboDamageMultiplier();
                 return damage;
             }
 
@@ -2187,6 +2276,8 @@
         function startWave() {
             if (game.waveActive || game.gameOver || game.stagePaused) return;
             game.wave++; game.waveActive = true; game.enemiesSpawned = 0;
+            resetCombo();
+            chooseWaveMutator();
             document.getElementById('start-wave-btn').disabled = true;
 
             const now = Date.now();
@@ -2206,6 +2297,15 @@
             else { enemyCount = 15 + stageBonus * 5; types = ['dragon', 'demon', 'boss']; speedMult = 1.35; }
 
             game.totalEnemiesToSpawn = enemyCount;
+            if (game.waveMutator && game.waveMutator.key !== "mutatorNone") {
+                game.effects.push({
+                    x: canvas.width / 2,
+                    y: 110,
+                    text: `🧬 ${t('mutator')}: ${t(game.waveMutator.key)}`,
+                    color: game.waveMutator.aura || "#9b59b6",
+                    life: 75
+                });
+            }
 
             const spawnInterval = setInterval(() => {
                 if (game.enemiesSpawned >= enemyCount || game.gameOver) { clearInterval(spawnInterval); return; }
@@ -2225,6 +2325,7 @@
             document.getElementById('wave').textContent = game.wave;
             document.getElementById('stage').textContent = game.stage;
             document.getElementById('kills').textContent = game.kills;
+            document.getElementById('combo').textContent = `x${game.combo}`;
 
             document.querySelectorAll('.hero-card').forEach(card => {
                 const type = card.dataset.type;
@@ -2243,10 +2344,14 @@
                 document.getElementById('start-wave-btn').disabled = false;
 
                 const bonus = 30 + game.wave * 10 + game.stage * 20;
-                game.gold += bonus;
+                const comboBonus = Math.floor((game.maxCombo - 1) * 8);
+                game.gold += bonus + comboBonus;
                 
                 game.effects.push({ x: canvas.width / 2, y: canvas.height / 2 - 50, text: `🎉 ${t('waveComplete', game.wave)}`, color: '#f1c40f', life: 50 });
                 game.effects.push({ x: canvas.width / 2, y: canvas.height / 2, text: `+${bonus}💰 ${t('bonus')}`, color: '#2ecc71', life: 50 });
+                if (comboBonus > 0) {
+                    game.effects.push({ x: canvas.width / 2, y: canvas.height / 2 + 35, text: `🔥 +${comboBonus}💰 ${t('comboBonus')}`, color: '#e67e22', life: 55 });
+                }
                 
                 updateUI();
 
@@ -2339,6 +2444,8 @@
             game.gameOver = false; game.stagePaused = false; game.enemiesSpawned = 0;
             game.totalEnemiesToSpawn = 0; game.gameSpeed = 1; game.kills = 0;
             game.abilityCooldown = 0; game.abilityReady = true; game.lastAbilityUse = 0;
+            resetCombo();
+            game.waveMutator = null;
             
             document.getElementById('auto-wave-btn').textContent = '🔄 ' + t('autoOff');
             document.getElementById('auto-wave-btn').classList.remove('active');
@@ -2422,6 +2529,10 @@
             const stageText = `🏰 ${t('stage').toUpperCase()} ${game.stage} - ${t(diff.key)} | 💰 ${goldMult}x ${t('gold').toLowerCase()}${speedText}`;
             ctx.strokeText(stageText, 15, 25);
             ctx.fillText(stageText, 15, 25);
+            const mutatorText = game.waveMutator ? `${t('mutator')}: ${t(game.waveMutator.key)}` : `${t('mutator')}: ${t('mutatorNone')}`;
+            ctx.font = "bold 13px Arial";
+            ctx.strokeText(`🔥 Combo x${game.combo} | 🧬 ${mutatorText}`, 15, 44);
+            ctx.fillText(`🔥 Combo x${game.combo} | 🧬 ${mutatorText}`, 15, 44);
 
             if (game.selectedHeroType && !game.stagePaused) {
                 ctx.font = 'bold 18px Arial'; ctx.fillStyle = '#fff';
